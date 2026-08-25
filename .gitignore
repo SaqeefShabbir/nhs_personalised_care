@@ -5,3 +5,5 @@ env/
 ENV/
 env.bak/
 venv.bak/
+.vercel
+.env*
