@@ -1,27 +1,15 @@
 import sys
 import os
-import logging
+from flask import Flask, jsonify, send_from_directory, render_template_string, request
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+app = Flask(__name__, static_folder='static', template_folder='templates')
 
-try:
-    from flask import Flask, jsonify, request
-    logger.info("Flask imported successfully")
-except ImportError as e:
-    logger.error(f"Failed to import Flask: {e}")
-    raise
-
-app = Flask(__name__)
+with open('templates/index.html', 'r', encoding='utf-8') as f:
+    DASHBOARD_HTML = f.read()
 
 @app.route('/')
 def home():
-    return jsonify({
-        "message": "NHS Personalised Care API",
-        "status": "running",
-        "version": "1.0.0",
-        "environment": "vercel"
-    })
+    return DASHBOARD_HTML
 
 @app.route('/api/health')
 def health():
@@ -31,15 +19,34 @@ def health():
         "python_version": sys.version
     })
 
-@app.errorhandler(404)
-def not_found(e):
-    return jsonify({"error": "Not found", "status": 404}), 404
+@app.route('/api/person/<nhs_number>')
+def get_person(nhs_number):
+    # Your API logic here
+    return jsonify({"success": True, "data": {"nhs_number": nhs_number, "name": "Test User"}})
 
-@app.errorhandler(500)
-def server_error(e):
-    return jsonify({"error": "Internal server error", "status": 500}), 500
+@app.route('/api/goals/<person_id>')
+def get_goals(person_id):
+    return jsonify({"success": True, "data": []})
+
+@app.route('/api/outcomes/<person_id>')
+def get_outcomes(person_id):
+    return jsonify({"success": True, "data": []})
+
+@app.route('/api/pam/<person_id>')
+def get_pam(person_id):
+    return jsonify({"success": True, "data": []})
+
+@app.route('/api/notes/<person_id>')
+def get_notes(person_id):
+    return jsonify({"success": True, "data": []})
+
+@app.route('/api/insights/<person_id>')
+def get_insights(person_id):
+    return jsonify({"success": True, "data": {"risk_assessment": {"risk_level": "low"}}})
+
+@app.route('/api/population')
+def get_population():
+    return jsonify({"success": True, "data": {"total_patients": 3, "average_pam": 65}})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
-else:
-    logger.info("App loaded successfully for Vercel")
