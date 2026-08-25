@@ -4,2344 +4,299 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#005EB8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>NHS Personalised Care</title>
     <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        :root {
-            --primary: #005EB8;
-            --primary-dark: #003D7A;
-            --primary-light: #E8F0FA;
-            --success: #009639;
-            --warning: #FFB81C;
-            --danger: #DA291C;
-            --gray: #D8D8D8;
-            --gray-dark: #6B6B6B;
-            --text: #212121;
-            --text-light: #6B6B6B;
-            --background: #F5F7FA;
-            --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-            --radius: 16px;
-            --sidebar-width: 240px;
-            --header-height: 64px;
-            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--background);
-            color: var(--text);
-            display: flex;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--gray);
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--gray-dark);
-        }
-
-        .sidebar {
-            width: var(--sidebar-width);
-            background: white;
-            border-right: 1px solid #E8ECF0;
-            padding: 20px 12px;
+        /* ... your existing styles ... */
+        /* Add this to your styles */
+        
+        /* PWA Install Banner */
+        .install-banner {
+            display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            overflow-y: auto;
-            z-index: 100;
-            transition: transform var(--transition);
+            bottom: 80px;
+            left: 16px;
+            right: 16px;
+            background: white;
+            border-radius: 16px;
+            padding: 16px 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideUpBanner 0.4s ease;
+            border: 1px solid #E8ECF0;
         }
-
-        .sidebar .logo {
+        
+        .install-banner.show {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 32px;
-            padding: 0 8px;
         }
-
-        .sidebar .logo .badge {
-            background: var(--primary);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
+        
+        @keyframes slideUpBanner {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
-        .sidebar .logo h1 {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .sidebar .logo small {
-            font-size: 10px;
-            color: var(--text-light);
-            display: block;
-            font-weight: 400;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 11px 14px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            color: var(--text);
-            margin-bottom: 2px;
-            border: none;
-            background: none;
-            width: 100%;
-            font-size: 14px;
-            font-weight: 500;
-            position: relative;
-        }
-
-        .nav-item:hover {
-            background: var(--primary-light);
-        }
-
-        .nav-item.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .nav-item .icon {
-            font-size: 20px;
-            width: 28px;
-            text-align: center;
+        
+        .install-banner .icon {
+            font-size: 32px;
             flex-shrink: 0;
         }
-
-        .nav-item .badge {
-            margin-left: auto;
-            background: var(--danger);
-            color: white;
-            padding: 1px 8px;
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .nav-item.active .badge {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .main-content {
-            margin-left: var(--sidebar-width);
+        
+        .install-banner .content {
             flex: 1;
-            padding: 20px 28px 40px;
-            min-height: 100vh;
-            max-width: calc(100% - var(--sidebar-width));
         }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 28px;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .mobile-toggle {
-            display: none;
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 20px;
-            cursor: pointer;
-        }
-
-        .header h1 {
-            font-size: 24px;
-            font-weight: 700;
-            line-height: 1.2;
-        }
-
-        .header .subtitle {
-            color: var(--text-light);
-            font-size: 14px;
-            font-weight: 400;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .header-actions input {
-            padding: 8px 14px;
-            border: 2px solid #E8ECF0;
-            border-radius: 10px;
-            font-size: 14px;
-            min-width: 180px;
-            transition: border-color 0.2s;
-            background: white;
-        }
-
-        .header-actions input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .btn {
-            padding: 9px 18px;
-            border: none;
-            border-radius: 10px;
+        
+        .install-banner .content h4 {
+            font-size: 15px;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 14px;
-            white-space: nowrap;
+            color: var(--text);
         }
-
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .btn:active {
-            transform: scale(0.97);
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-        .btn-primary:hover {
-            background: var(--primary-dark);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-        }
-
-        .btn-outline:hover {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-sm {
-            padding: 5px 12px;
-            font-size: 12px;
-        }
-
-        .view {
-            display: none;
-            animation: fadeIn 0.35s ease;
-        }
-
-        .view.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(12px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .card {
-            background: white;
-            border-radius: var(--radius);
-            padding: 20px;
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
-            transition: transform 0.2s;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .card-header h3 {
-            font-size: 17px;
-            font-weight: 600;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 14px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 18px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            transition: transform 0.2s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .stat-card .label {
-            font-size: 13px;
-            color: var(--text-light);
-            margin-bottom: 2px;
-        }
-
-        .stat-card .value {
-            font-size: 28px;
-            font-weight: 700;
-        }
-
-        .stat-card .change {
-            font-size: 12px;
-            margin-top: 4px;
-        }
-
-        .stat-card .change.up {
-            color: var(--success);
-        }
-        .stat-card .change.down {
-            color: var(--danger);
-        }
-
-        .pam-card {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            padding: 24px 28px;
-            border-radius: var(--radius);
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-        }
-
-        .pam-card .score {
-            font-size: 56px;
-            font-weight: 700;
-            line-height: 1;
-        }
-
-        .pam-card .level {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 4px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            margin-top: 6px;
-        }
-
-        .pam-card .trend {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            margin-left: 10px;
-            font-size: 13px;
-        }
-
-        .pam-card .trend.up {
-            color: #7FFF7F;
-        }
-        .pam-card .trend.down {
-            color: #FF7F7F;
-        }
-
-        .goal-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #F0F0F0;
-            gap: 12px;
-        }
-
-        .goal-item:last-child {
-            border-bottom: none;
-        }
-
-        .goal-item .info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .goal-item .description {
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        .goal-item .domain {
-            font-size: 12px;
-            color: var(--text-light);
-        }
-
-        .goal-item .status {
-            padding: 3px 12px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .goal-item .status.achieved {
-            background: #E8F5E9;
-            color: #2E7D32;
-        }
-        .goal-item .status.in_progress {
-            background: #E3F2FD;
-            color: #005EB8;
-        }
-        .goal-item .status.planned {
-            background: #FFF3E0;
-            color: #E65100;
-        }
-        .goal-item .status.partially_achieved {
-            background: #FFF8E1;
-            color: #F57F17;
-        }
-        .goal-item .status.abandoned {
-            background: #F5F5F5;
-            color: #757575;
-        }
-
-        .goal-item .progress {
-            width: 70px;
-            height: 4px;
-            background: var(--gray);
-            border-radius: 2px;
-            overflow: hidden;
-            margin-top: 4px;
-        }
-
-        .goal-item .progress .fill {
-            height: 100%;
-            background: var(--primary);
-            border-radius: 2px;
-            transition: width 0.8s ease;
-        }
-
-        .table-container {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-
-        th {
-            text-align: left;
-            padding: 10px 8px;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-light);
-            border-bottom: 2px solid #F0F0F0;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-
-        td {
-            padding: 10px 8px;
-            border-bottom: 1px solid #F5F5F5;
-        }
-
-        tr:hover td {
-            background: #FAFAFA;
-        }
-
-        .insight-item {
-            padding: 14px 16px;
-            border-left: 4px solid var(--primary);
-            background: var(--primary-light);
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        .insight-item .title {
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .insight-item .desc {
+        
+        .install-banner .content p {
             font-size: 13px;
             color: var(--text-light);
             margin-top: 2px;
         }
-
-        .insight-item .priority {
-            display: inline-block;
-            padding: 2px 10px;
+        
+        .install-banner .btn-install {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 20px;
             border-radius: 10px;
-            font-size: 11px;
             font-weight: 600;
-            margin-top: 4px;
-        }
-
-        .insight-item .priority.high {
-            background: var(--danger);
-            color: white;
-        }
-        .insight-item .priority.medium {
-            background: var(--warning);
-            color: #333;
-        }
-        .insight-item .priority.low {
-            background: var(--gray);
-            color: #333;
-        }
-
-        .risk-indicator {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-radius: 10px;
-            margin: 8px 0;
-        }
-
-        .risk-indicator.low {
-            background: #E8F5E9;
-            color: #2E7D32;
-        }
-        .risk-indicator.medium {
-            background: #FFF3E0;
-            color: #E65100;
-        }
-        .risk-indicator.high {
-            background: #FFEBEE;
-            color: #C62828;
-        }
-        .risk-indicator.critical {
-            background: #FF1744;
-            color: white;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%,
-            100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.7;
-            }
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-light);
-        }
-
-        .empty-state .icon {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-
-        .empty-state h4 {
-            color: var(--text);
-            margin-bottom: 4px;
-        }
-
-        .empty-state p {
             font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
         }
-
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 200;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            backdrop-filter: blur(4px);
+        
+        .install-banner .btn-install:active {
+            transform: scale(0.95);
         }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal {
-            background: white;
-            border-radius: 24px;
-            padding: 28px 32px;
-            max-width: 520px;
-            width: 100%;
-            max-height: 85vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .modal .close {
-            float: right;
+        
+        .install-banner .btn-close {
             background: none;
             border: none;
-            font-size: 24px;
+            font-size: 20px;
             cursor: pointer;
             color: var(--text-light);
             padding: 4px 8px;
-            border-radius: 6px;
-            transition: background 0.2s;
         }
-
-        .modal .close:hover {
-            background: #F5F5F5;
-        }
-
-        .modal h2 {
-            margin-bottom: 20px;
-            font-size: 22px;
-            font-weight: 700;
-        }
-
-        .modal .form-group {
-            margin-bottom: 14px;
-        }
-
-        .modal .form-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-light);
-            margin-bottom: 4px;
-        }
-
-        .modal .form-group input,
-        .modal .form-group select,
-        .modal .form-group textarea {
-            width: 100%;
-            padding: 10px 14px;
-            border: 2px solid #E8ECF0;
-            border-radius: 10px;
-            font-size: 14px;
-            font-family: inherit;
-            transition: border-color 0.2s;
-            background: white;
-        }
-
-        .modal .form-group input:focus,
-        .modal .form-group select:focus,
-        .modal .form-group textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .modal .form-group textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-
-        .modal .btn {
-            width: 100%;
-            justify-content: center;
-            margin-top: 6px;
-        }
-
-        .modal .btn+.btn {
-            margin-top: 8px;
-        }
-
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 300;
-            max-width: 400px;
-            width: 100%;
-            pointer-events: none;
-        }
-
-        .toast {
-            background: #323232;
-            color: white;
-            padding: 14px 18px;
-            border-radius: 12px;
-            margin-bottom: 8px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            animation: slideIn 0.4s ease;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            pointer-events: auto;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(100%);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .toast.success {
-            background: var(--success);
-        }
-        .toast.error {
-            background: var(--danger);
-        }
-        .toast.info {
-            background: var(--primary);
-        }
-
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.85);
-            z-index: 999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(4px);
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--gray);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        @media (max-width: 1024px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                width: 280px;
-            }
-
-            .sidebar.open {
-                transform: translateX(0);
-            }
-
-            .main-content {
-                margin-left: 0;
-                padding: 16px;
-                max-width: 100%;
-            }
-
-            .mobile-toggle {
-                display: flex;
-            }
-
-            .header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .header-actions {
-                flex-wrap: wrap;
-            }
-
-            .header-actions input {
-                flex: 1;
-                min-width: 120px;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-            }
-
-            .pam-card .score {
-                font-size: 40px;
-            }
-
-            .modal {
-                padding: 20px;
-                margin: 10px;
-            }
-
-            .toast-container {
-                right: 12px;
-                left: 12px;
-                max-width: 100%;
-            }
-        }
-
+        
         @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 8px;
+            .install-banner {
+                bottom: 70px;
+                padding: 12px 16px;
             }
-
-            .stat-card {
-                padding: 12px;
-            }
-
-            .stat-card .value {
-                font-size: 22px;
-            }
-
-            .pam-card {
-                padding: 18px 20px;
-            }
-
-            .pam-card .score {
-                font-size: 36px;
-            }
-
-            .header h1 {
-                font-size: 20px;
-            }
-
-            .btn {
-                font-size: 13px;
-                padding: 8px 14px;
-            }
-
-            .goal-item {
-                flex-wrap: wrap;
-            }
-
-            .goal-item .status {
-                font-size: 10px;
-                padding: 2px 10px;
-            }
-
-            table {
-                font-size: 13px;
-            }
-
-            th,
-            td {
-                padding: 6px 4px;
-            }
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --background: #121212;
-                --text: #E8E8E8;
-                --text-light: #B0B0B0;
-                --shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
-            }
-
-            .sidebar {
-                background: #1E1E1E;
-                border-right-color: #333;
-            }
-
-            .card {
-                background: #1E1E1E;
-            }
-
-            .stat-card {
-                background: #1E1E1E;
-            }
-
-            .goal-item {
-                border-bottom-color: #333;
-            }
-
-            .goal-item:hover {
-                background: #2A2A2A;
-            }
-
-            .modal {
-                background: #1E1E1E;
-            }
-
-            .modal .form-group input,
-            .modal .form-group select,
-            .modal .form-group textarea {
-                background: #2A2A2A;
-                border-color: #444;
-                color: #E8E8E8;
-            }
-
-            .header-actions input {
-                background: #1E1E1E;
-                border-color: #444;
-                color: #E8E8E8;
-            }
-
-            .nav-item:hover {
-                background: #2A2A2A;
-            }
-
-            tr:hover td {
-                background: #2A2A2A;
-            }
-
-            .insight-item {
-                background: #2A2A2A;
-            }
-
-            .risk-indicator.low {
-                background: #1B3A1B;
-                color: #81C784;
-            }
-            .risk-indicator.medium {
-                background: #3A2A1B;
-                color: #FFB74D;
-            }
-            .risk-indicator.high {
-                background: #3A1B1B;
-                color: #EF9A9A;
-            }
-            .risk-indicator.critical {
-                background: #B71C1C;
-                color: white;
-            }
-
-            .goal-item .status.achieved {
-                background: #1B3A1B;
-                color: #81C784;
-            }
-            .goal-item .status.in_progress {
-                background: #1A2A4A;
-                color: #64B5F6;
-            }
-            .goal-item .status.planned {
-                background: #3A2A1B;
-                color: #FFB74D;
-            }
-
-            .loading-overlay {
-                background: rgba(0, 0, 0, 0.85);
-            }
-
-            .modal .close:hover {
-                background: #2A2A2A;
-            }
-
-            .btn-outline {
-                border-color: var(--primary-light);
-                color: var(--primary-light);
-            }
-
-            .btn-outline:hover {
-                background: var(--primary);
-                color: white;
-            }
+            .install-banner .icon { font-size: 24px; }
+            .install-banner .content h4 { font-size: 14px; }
+            .install-banner .content p { font-size: 12px; }
+            .install-banner .btn-install { padding: 6px 14px; font-size: 13px; }
         }
     </style>
 </head>
 <body>
 
-    <nav class="sidebar" id="sidebar">
-        <div class="logo">
-            <div>
-                <h1>NHS Care</h1>
-                <small>Personalised Health</small>
-            </div>
-            <span class="badge">v2.0</span>
+    <!-- ========== INSTALL BANNER ========== -->
+    <div class="install-banner" id="installBanner">
+        <span class="icon">📱</span>
+        <div class="content">
+            <h4>Install NHS Personalised Care</h4>
+            <p>Get offline access and quick launch from your home screen</p>
         </div>
+        <button class="btn-install" id="installBtn">Install</button>
+        <button class="btn-close" id="closeInstallBanner">✕</button>
+    </div>
 
-        <button class="nav-item active" data-view="dashboard" onclick="navigateTo('dashboard')">
-            <span class="icon">📊</span>
-            Dashboard
-        </button>
-
-        <button class="nav-item" data-view="patients" onclick="navigateTo('patients')">
-            <span class="icon">👤</span>
-            Patients
-            <span class="badge" id="patientBadge">3</span>
-        </button>
-
-        <button class="nav-item" data-view="goals" onclick="navigateTo('goals')">
-            <span class="icon">🎯</span>
-            Goals
-            <span class="badge" id="goalBadge">0</span>
-        </button>
-
-        <button class="nav-item" data-view="outcomes" onclick="navigateTo('outcomes')">
-            <span class="icon">📈</span>
-            Outcomes
-        </button>
-
-        <button class="nav-item" data-view="insights" onclick="navigateTo('insights')">
-            <span class="icon">🧠</span>
-            AI Insights
-        </button>
-
-        <button class="nav-item" data-view="notes" onclick="navigateTo('notes')">
-            <span class="icon">📝</span>
-            Notes
-        </button>
-
-        <button class="nav-item" data-view="settings" onclick="navigateTo('settings')">
-            <span class="icon">⚙️</span>
-            Settings
-        </button>
+    <!-- ========== REST OF YOUR HTML ========== -->
+    <nav class="sidebar" id="sidebar">
+        <!-- ... your existing sidebar ... -->
     </nav>
 
     <main class="main-content">
-
-        <div class="header">
-            <div class="header-left">
-                <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
-                <div>
-                    <h1 id="pageTitle">Dashboard</h1>
-                    <div class="subtitle" id="pageSubtitle">Overview of your personalised care</div>
-                </div>
-            </div>
-            <div class="header-actions">
-                <input type="text" placeholder="🔍 Search patients..." id="searchInput" oninput="searchPatients()">
-                <button class="btn btn-primary" onclick="showModal('addPatient')">+ New Patient</button>
-                <button class="btn btn-outline" onclick="refreshData()">🔄 Refresh</button>
-            </div>
-        </div>
-
-        <div id="view-dashboard" class="view active">
-
-            <!-- PAM Card -->
-            <div class="pam-card" id="pamCard">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
-                    <div>
-                        <div style="font-size:13px;opacity:0.8;">Patient Activation Measure</div>
-                        <div class="score" id="pamScore">--</div>
-                        <div>
-                            <span class="level" id="pamLevel">Loading...</span>
-                            <span class="trend" id="pamTrend">➡️</span>
-                        </div>
-                    </div>
-                    <div style="text-align:right;">
-                        <div style="font-size:12px;opacity:0.8;">Last updated</div>
-                        <div style="font-weight:500;" id="pamDate">--</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="stats-grid" id="statsGrid">
-                <div class="stat-card">
-                    <div class="label">Total Goals</div>
-                    <div class="value" id="statGoals">0</div>
-                    <div class="change" id="statGoalsChange">--</div>
-                </div>
-                <div class="stat-card">
-                    <div class="label">Completion Rate</div>
-                    <div class="value" id="statRate">0%</div>
-                    <div class="change" id="statRateChange">--</div>
-                </div>
-                <div class="stat-card">
-                    <div class="label">Outcomes Tracked</div>
-                    <div class="value" id="statOutcomes">0</div>
-                    <div class="change" id="statOutcomesChange">--</div>
-                </div>
-                <div class="stat-card">
-                    <div class="label">Shared Decisions</div>
-                    <div class="value" id="statDecisions">0</div>
-                    <div class="change" id="statDecisionsChange">--</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h3>🛡️ Risk Assessment</h3>
-                    <span id="riskBadge" style="padding:4px 16px;border-radius:12px;font-weight:600;font-size:13px;">Loading...</span>
-                </div>
-                <div id="riskFactors" style="font-size:14px;color:var(--text-light);">
-                    Loading risk factors...
-                </div>
-                <div style="margin-top:12px;">
-                    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
-                        <span>Risk Score</span>
-                        <span id="riskScore">--</span>
-                    </div>
-                    <div style="height:6px;background:var(--gray);border-radius:3px;overflow:hidden;">
-                        <div id="riskBar" style="height:100%;width:0%;background:var(--success);border-radius:3px;transition:width 0.8s ease;"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h3>📋 Recent Activity</h3>
-                    <button class="btn btn-outline btn-sm" onclick="navigateTo('goals')">View All</button>
-                </div>
-                <div id="recentActivity">
-                    <div class="empty-state" style="padding:20px;">
-                        <p>No recent activity</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="view-patients" class="view">
-            <div class="card">
-                <div class="card-header">
-                    <h3>👤 Patient List</h3>
-                    <button class="btn btn-primary" onclick="showModal('addPatient')">+ Add Patient</button>
-                </div>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>NHS Number</th>
-                                <th>Name</th>
-                                <th>Age</th>
-                                <th>Gender</th>
-                                <th>PAM</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="patientTableBody">
-                            <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-light);">Loading patients...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div id="view-goals" class="view">
-            <div class="card">
-                <div class="card-header">
-                    <h3>🎯 All Goals</h3>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                        <select id="goalFilter" onchange="filterGoals()" style="padding:8px 12px;border-radius:8px;border:2px solid #E8ECF0;font-size:13px;background:white;">
-                            <option value="all">All</option>
-                            <option value="planned">Planned</option>
-                            <option value="in_progress">In Progress</option>
-                            <option value="achieved">Achieved</option>
-                            <option value="partially_achieved">Partially</option>
-                            <option value="abandoned">Abandoned</option>
-                        </select>
-                        <button class="btn btn-primary" onclick="showModal('addGoal')">+ New Goal</button>
-                    </div>
-                </div>
-                <div id="goalsList">
-                    <div class="empty-state">
-                        <div class="icon">🎯</div>
-                        <h4>Loading goals...</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="view-outcomes" class="view">
-            <div class="card">
-                <div class="card-header">
-                    <h3>📈 Health Outcomes</h3>
-                    <button class="btn btn-primary" onclick="showModal('addOutcome')">+ Record Outcome</button>
-                </div>
-                <div id="outcomesList">
-                    <div class="empty-state">
-                        <div class="icon">📈</div>
-                        <h4>Loading outcomes...</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="view-insights" class="view">
-            <div class="card">
-                <div class="card-header">
-                    <h3>🧠 AI-Powered Insights</h3>
-                    <button class="btn btn-outline" onclick="generateInsights()">🔄 Refresh</button>
-                </div>
-                <div id="insightsContent">
-                    <div class="empty-state">
-                        <div class="icon">🧠</div>
-                        <h4>Generating insights...</h4>
-                        <p>AI analysis in progress</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="view-notes" class="view">
-            <div class="card">
-                <div class="card-header">
-                    <h3>📝 Clinical Notes</h3>
-                    <button class="btn btn-primary" onclick="showModal('addNote')">+ Add Note</button>
-                </div>
-                <div id="notesList">
-                    <div class="empty-state">
-                        <div class="icon">📝</div>
-                        <h4>Loading notes...</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="view-settings" class="view">
-            <div class="card">
-                <div class="card-header">
-                    <h3>⚙️ Settings</h3>
-                </div>
-                <div style="margin-top:4px;">
-                    <div style="margin-bottom:16px;">
-                        <label style="display:block;font-weight:600;margin-bottom:4px;font-size:14px;">Current Patient</label>
-                        <select id="patientSelect" onchange="changePatient()" style="padding:10px;border-radius:8px;border:2px solid #E8ECF0;width:100%;max-width:300px;background:white;font-size:14px;">
-                            <option>Loading...</option>
-                        </select>
-                    </div>
-                    <div style="margin-bottom:16px;">
-                        <label style="display:block;font-weight:600;margin-bottom:4px;font-size:14px;">Notifications</label>
-                        <label style="display:flex;align-items:center;gap:8px;margin:4px 0;font-size:14px;cursor:pointer;">
-                            <input type="checkbox" checked> Enable Push Notifications
-                        </label>
-                        <label style="display:flex;align-items:center;gap:8px;margin:4px 0;font-size:14px;cursor:pointer;">
-                            <input type="checkbox" checked> AI Insight Alerts
-                        </label>
-                        <label style="display:flex;align-items:center;gap:8px;margin:4px 0;font-size:14px;cursor:pointer;">
-                            <input type="checkbox"> Email Reports
-                        </label>
-                    </div>
-                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                        <button class="btn btn-outline" onclick="exportData()">📤 Export Data</button>
-                        <button class="btn btn-danger" onclick="clearData()">🗑️ Clear Data</button>
-                    </div>
-                    <div style="margin-top:16px;padding-top:16px;border-top:1px solid #E8ECF0;">
-                        <p style="font-size:13px;color:var(--text-light);">
-                            NHS England Personalised Care Model v2.0<br>
-                            AI-powered health management
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        <!-- ... your existing content ... -->
     </main>
 
     <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
         <div class="modal">
             <button class="close" onclick="closeModal()">✕</button>
-            <div id="modalBody">
-            </div>
+            <div id="modalBody"></div>
         </div>
     </div>
 
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- ========== UPDATED JAVASCRIPT ========== -->
     <script>
-        const App = {
-            currentPatient: 'NHS123456',
-            patients: [],
-            goals: [],
-            outcomes: [],
-            pamScores: [],
-            notes: [],
-            insights: {},
-            activeView: 'dashboard',
-            isLoaded: false
-        };
+        // ... your existing App object and functions ...
+        
+        // ================================================================
+        // PWA INSTALLATION FEATURE
+        // ================================================================
+        
+        let deferredPrompt = null;
+        let isAppInstalled = false;
 
-        const API_URL = '/api';
-
-        document.addEventListener('DOMContentLoaded', function() {
-            loadData();
-            // Auto-refresh every 30 seconds
-            setInterval(() => {
-                if (App.isLoaded && document.visibilityState === 'visible') {
-                    loadData();
-                }
-            }, 30000);
-        });
-
-        async function loadData() {
-            showLoading();
-            try {
-                await Promise.all([
-                    loadPatients(),
-                    loadGoals(),
-                    loadOutcomes(),
-                    loadPAM(),
-                    loadNotes()
-                ]);
-                await generateInsights();
-                App.isLoaded = true;
-                renderAll();
-                hideLoading();
-                showToast('✅ Data Loaded', 'All data refreshed successfully', 'success');
-            } catch (error) {
-                console.error('Error loading data:', error);
-                hideLoading();
-                showToast('❌ Error', 'Failed to load data: ' + error.message, 'error');
-            }
+        // Check if app is already installed
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            isAppInstalled = true;
+            document.getElementById('installBanner').classList.remove('show');
         }
 
-        async function loadPatients() {
-            try {
-                const res = await fetch(API_URL + '/person/NHS123456');
-                const data = await res.json();
-                if (data.success) {
-                    App.patients = [data.data];
-                    // Load additional patients
-                    for (const nhs of ['NHS789012', 'NHS345678']) {
-                        try {
-                            const r = await fetch(API_URL + '/person/' + nhs);
-                            const d = await r.json();
-                            if (d.success) App.patients.push(d.data);
-                        } catch (e) {}
-                    }
-                }
-            } catch (e) {
-                console.error('Error loading patients:', e);
-                // Use fallback data
-                App.patients = [
-                    { nhs_number: 'NHS123456', name: 'Sarah Johnson', date_of_birth: '1965-05-15', gender: 'Female' },
-                    { nhs_number: 'NHS789012', name: 'James Smith', date_of_birth: '1978-03-22', gender: 'Male' },
-                    { nhs_number: 'NHS345678', name: 'Aisha Patel', date_of_birth: '1990-11-08', gender: 'Female' }
-                ];
-            }
-        }
-
-        async function loadGoals() {
-            try {
-                const res = await fetch(API_URL + '/goals/' + App.currentPatient);
-                const data = await res.json();
-                if (data.success) {
-                    App.goals = data.data || [];
-                }
-            } catch (e) {
-                console.error('Error loading goals:', e);
-                App.goals = [];
-            }
-        }
-
-        async function loadOutcomes() {
-            try {
-                const res = await fetch(API_URL + '/outcomes/' + App.currentPatient);
-                const data = await res.json();
-                if (data.success) {
-                    App.outcomes = data.data || [];
-                }
-            } catch (e) {
-                console.error('Error loading outcomes:', e);
-                App.outcomes = [];
-            }
-        }
-
-        async function loadPAM() {
-            try {
-                const res = await fetch(API_URL + '/pam/' + App.currentPatient);
-                const data = await res.json();
-                if (data.success) {
-                    App.pamScores = data.data || [];
-                }
-            } catch (e) {
-                console.error('Error loading PAM:', e);
-                App.pamScores = [];
-            }
-        }
-
-        async function loadNotes() {
-            try {
-                const res = await fetch(API_URL + '/notes/' + App.currentPatient);
-                const data = await res.json();
-                if (data.success) {
-                    App.notes = data.data || [];
-                }
-            } catch (e) {
-                console.error('Error loading notes:', e);
-                App.notes = [];
-            }
-        }
-
-        async function generateInsights() {
-            try {
-                const res = await fetch(API_URL + '/insights/' + App.currentPatient);
-                const data = await res.json();
-                if (data.success) {
-                    App.insights = data.data || {};
-                }
-            } catch (e) {
-                console.error('Error generating insights:', e);
-                App.insights = {};
-            }
-        }
-
-        function renderAll() {
-            renderDashboard();
-            renderPatients();
-            renderGoals();
-            renderOutcomes();
-            renderNotes();
-            renderInsights();
-            renderSettings();
-        }
-
-        function renderDashboard() {
-            const pam = App.pamScores.length > 0 ? App.pamScores[App.pamScores.length - 1] : { score: '--', level: 1 };
-
-            document.getElementById('pamScore').textContent = pam.score || '--';
-            document.getElementById('pamLevel').textContent = pam.score ? 'Level ' + (pam.level || 1) + ' - ' + getPamLevelText(
-                pam.level) : 'No data';
-
-            if (App.pamScores.length > 1) {
-                const last = App.pamScores[App.pamScores.length - 1].score;
-                const prev = App.pamScores[App.pamScores.length - 2].score;
-                const diff = last - prev;
-                const trendEl = document.getElementById('pamTrend');
-                if (diff > 3) {
-                    trendEl.className = 'trend up';
-                    trendEl.textContent = '📈 Improving';
-                } else if (diff < -3) {
-                    trendEl.className = 'trend down';
-                    trendEl.textContent = '📉 Declining';
-                } else {
-                    trendEl.className = 'trend';
-                    trendEl.textContent = '➡️ Stable';
-                }
-            } else {
-                document.getElementById('pamTrend').textContent = '➡️ No trend data';
-            }
-
-            document.getElementById('pamDate').textContent = App.pamScores.length > 0 ?
-                new Date(App.pamScores[App.pamScores.length - 1].date_taken).toLocaleDateString() :
-                new Date().toLocaleDateString();
-
-            // Stats
-            const completed = App.goals.filter(g => g.status === 'achieved');
-            const totalGoals = App.goals.length;
-            const completionRate = totalGoals > 0 ? (completed.length / totalGoals * 100) : 0;
-
-            document.getElementById('statGoals').textContent = totalGoals;
-            document.getElementById('statRate').textContent = completionRate.toFixed(1) + '%';
-            document.getElementById('statOutcomes').textContent = App.outcomes.length;
-            document.getElementById('statDecisions').textContent = App.notes.length || 0;
-
-            // Change indicators
-            document.getElementById('statGoalsChange').textContent = totalGoals > 0 ? 'Active goals' : 'No goals yet';
-            document.getElementById('statRateChange').textContent = completionRate > 50 ? '✅ On track' : '📈 Needs attention';
-            document.getElementById('statOutcomesChange').textContent = App.outcomes.length > 0 ? 'Tracked' : 'None recorded';
-            document.getElementById('statDecisionsChange').textContent = App.notes.length > 0 ? 'Recorded' : 'None';
-
-            // Risk
-            const risk = App.insights.risk_assessment || { risk_level: 'low', risk_score: 0.25 };
-            const riskBadge = document.getElementById('riskBadge');
-            const riskLevel = risk.risk_level || 'low';
-            const riskLabels = { low: 'Low Risk', medium: 'Medium Risk', high: 'High Risk', critical: '🚨 CRITICAL' };
-            const riskColors = { low: '#E8F5E9', medium: '#FFF3E0', high: '#FFEBEE', critical: '#FF1744' };
-            const riskTextColors = { low: '#2E7D32', medium: '#E65100', high: '#C62828', critical: 'white' };
-
-            riskBadge.textContent = riskLabels[riskLevel] || 'Unknown';
-            riskBadge.style.background = riskColors[riskLevel] || '#F5F5F5';
-            riskBadge.style.color = riskTextColors[riskLevel] || '#333';
-
-            document.getElementById('riskScore').textContent = (risk.risk_score || 0).toFixed(2);
-            const riskPct = Math.min((risk.risk_score || 0) * 100, 100);
-            document.getElementById('riskBar').style.width = riskPct + '%';
-            document.getElementById('riskBar').style.background = riskLevel === 'low' ? 'var(--success)' : riskLevel ===
-                'medium' ? 'var(--warning)' : 'var(--danger)';
-
-            const factors = risk.factors || ['No significant risk factors identified'];
-            document.getElementById('riskFactors').textContent = factors.join(' • ');
-
-            // Goal badge
-            const active = App.goals.filter(g => g.status === 'in_progress' || g.status === 'planned').length;
-            document.getElementById('goalBadge').textContent = active;
-            document.getElementById('goalBadge').style.display = active > 0 ? 'inline' : 'none';
-
-            // Recent activity
-            renderRecentActivity();
-        }
-
-        function renderRecentActivity() {
-            const container = document.getElementById('recentActivity');
-            const activities = [];
-
-            // Add recent goals
-            App.goals.slice().reverse().slice(0, 3).forEach(g => {
-                activities.push({
-                    text: g.status === 'achieved' ? '✅ Goal completed: "' + g.description + '"' :
-                        g.status === 'in_progress' ? '🔄 Goal in progress: "' + g.description + '"' :
-                        '📋 New goal: "' + g.description + '"',
-                    time: g.updated_date || g.created_date || new Date().toISOString(),
-                    status: g.status
-                });
-            });
-
-            // Add recent outcomes
-            App.outcomes.slice().reverse().slice(0, 2).forEach(o => {
-                activities.push({
-                    text: '📊 Outcome recorded: ' + o.metric_name + ' = ' + o.value,
-                    time: o.date_recorded || new Date().toISOString(),
-                    status: o.target_value && o.value >= o.target_value ? 'achieved' : 'in_progress'
-                });
-            });
-
-            if (activities.length === 0) {
-                container.innerHTML =
-                    `<div class="empty-state" style="padding:20px;"><p>No recent activity</p></div>`;
-                return;
-            }
-
-            // Sort by time, most recent first
-            activities.sort((a, b) => new Date(b.time) - new Date(a.time));
-
-            container.innerHTML = activities.slice(0, 5).map(a => `
-                <div class="goal-item">
-                    <div class="info">
-                        <div class="description">${a.text}</div>
-                        <div class="domain">${new Date(a.time).toLocaleString()}</div>
-                    </div>
-                    <span class="status ${a.status === 'achieved' ? 'achieved' : a.status === 'in_progress' ? 'in_progress' : 'planned'}">
-                        ${a.status === 'achieved' ? '✅ Done' : a.status === 'in_progress' ? '⏳ Active' : '📋 New'}
-                    </span>
-                </div>
-            `).join('');
-        }
-
-        function renderPatients() {
-            const tbody = document.getElementById('patientTableBody');
-            if (!App.patients || App.patients.length === 0) {
-                tbody.innerHTML =
-                    '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-light);">No patients found</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = App.patients.map(p => {
-                const age = Math.floor((new Date() - new Date(p.date_of_birth)) / (365.25 * 24 * 60 * 60 * 1000));
-                const pam = App.pamScores.find(s => s.person_id === p.nhs_number) || { score: '--' };
-                const isActive = p.nhs_number === App.currentPatient;
-                return `
-                    <tr onclick="selectPatient('${p.nhs_number}')" style="cursor:pointer;">
-                        <td><strong>${p.nhs_number}</strong></td>
-                        <td>${p.name}</td>
-                        <td>${isNaN(age) ? '--' : age}</td>
-                        <td>${p.gender || 'N/A'}</td>
-                        <td><strong>${pam.score}</strong></td>
-                        <td><span class="status ${isActive ? 'in_progress' : ''}" style="${isActive ? 'background:#E3F2FD;color:#005EB8;' : ''}">${isActive ? '✅ Active' : 'Inactive'}</span></td>
-                        <td>
-                            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();selectPatient('${p.nhs_number}')">Select</button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-
-            document.getElementById('patientBadge').textContent = App.patients.length;
-        }
-
-        function renderGoals() {
-            const container = document.getElementById('goalsList');
-            const filter = document.getElementById('goalFilter').value;
-            let goals = App.goals;
-
-            if (filter !== 'all') {
-                goals = goals.filter(g => g.status === filter);
-            }
-
-            if (goals.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">🎯</div>
-                        <h4>No goals found</h4>
-                        <p>Create your first personalised goal</p>
-                        <button class="btn btn-primary" onclick="showModal('addGoal')">Add Goal</button>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = goals.map(g => {
-                const progress = g.status === 'achieved' ? 100 :
-                    g.status === 'in_progress' ? 50 :
-                    g.status === 'partially_achieved' ? 25 : 0;
-                return `
-                    <div class="goal-item">
-                        <div class="info">
-                            <div class="description">${g.description}</div>
-                            <div class="domain">${g.domain || 'General'} • ${g.target_date ? 'Target: ' + new Date(g.target_date).toLocaleDateString() : 'No target'}</div>
-                            <div class="progress">
-                                <div class="fill" style="width:${progress}%;"></div>
-                            </div>
-                        </div>
-                        <div style="text-align:right;flex-shrink:0;">
-                            <span class="status ${g.status}">${g.status.replace('_', ' ').toUpperCase()}</span>
-                            <div>
-                                <button class="btn btn-outline btn-sm" style="margin-top:4px;" onclick="showModal('editGoal','${g.goal_id}')">Edit</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function renderOutcomes() {
-            const container = document.getElementById('outcomesList');
-            if (App.outcomes.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">📈</div>
-                        <h4>No outcomes recorded</h4>
-                        <p>Track your health metrics</p>
-                        <button class="btn btn-primary" onclick="showModal('addOutcome')">Record Outcome</button>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = `
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Metric</th>
-                                <th>Domain</th>
-                                <th>Value</th>
-                                <th>Target</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${App.outcomes.slice().reverse().map(o => {
-                                const achieved = o.target_value && o.value >= o.target_value;
-                                return `
-                                    <tr>
-                                        <td><strong>${o.metric_name}</strong></td>
-                                        <td>${o.domain || 'General'}</td>
-                                        <td><strong>${o.value}</strong></td>
-                                        <td>${o.target_value || 'N/A'}</td>
-                                        <td>
-                                            <span class="status ${achieved ? 'achieved' : 'in_progress'}">
-                                                ${achieved ? '✅ Achieved' : '⏳ In Progress'}
-                                            </span>
-                                        </td>
-                                        <td>${new Date(o.date_recorded).toLocaleDateString()}</td>
-                                    </tr>
-                                `;
-                            }).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        }
-
-        function renderNotes() {
-            const container = document.getElementById('notesList');
-            if (App.notes.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">📝</div>
-                        <h4>No notes yet</h4>
-                        <p>Add clinical notes to track your health journey</p>
-                        <button class="btn btn-primary" onclick="showModal('addNote')">Add Note</button>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = App.notes.slice().reverse().map(n => `
-                <div style="padding:14px 0;border-bottom:1px solid #F0F0F0;">
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
-                        <div style="flex:1;min-width:0;">
-                            <div style="font-size:14px;word-wrap:break-word;">${n.note_text}</div>
-                            <div style="font-size:12px;color:var(--text-light);margin-top:4px;">
-                                ${n.author || 'Unknown'} • ${new Date(n.date_created).toLocaleString()}
-                            </div>
-                        </div>
-                        ${n.sentiment_score !== undefined ? `
-                            <span class="status ${n.sentiment_score > 0.1 ? 'achieved' : n.sentiment_score < -0.1 ? 'planned' : 'in_progress'}" style="flex-shrink:0;">
-                                ${n.sentiment_score > 0.1 ? '😊 Positive' : n.sentiment_score < -0.1 ? '😔 Negative' : '😐 Neutral'}
-                            </span>
-                        ` : ''}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderInsights() {
-            const container = document.getElementById('insightsContent');
-            const insights = App.insights;
-
-            if (!insights || Object.keys(insights).length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">🧠</div>
-                        <h4>No insights available</h4>
-                        <p>Generate AI insights to get started</p>
-                        <button class="btn btn-primary" onclick="generateInsights()">Generate Insights</button>
-                    </div>
-                `;
-                return;
-            }
-
-            let html = '';
-
-            const risk = insights.risk_assessment || {};
-            const riskLevel = risk.risk_level || 'low';
-            const riskColors = { low: 'var(--success)', medium: 'var(--warning)', high: 'var(--danger)',
-                critical: 'var(--danger)' };
-            html += `
-                <div style="padding:14px 16px;border-left:4px solid ${riskColors[riskLevel] || 'var(--primary)'};background:#FAFAFA;border-radius:8px;margin-bottom:14px;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-                        <div>
-                            <strong>Risk Assessment</strong>
-                            <div style="font-size:13px;color:var(--text-light);">${riskLevel.toUpperCase()} Risk • Score: ${(risk.risk_score || 0).toFixed(2)}</div>
-                        </div>
-                        <span class="status ${riskLevel === 'low' ? 'achieved' : riskLevel === 'medium' ? 'in_progress' : 'planned'}">
-                            ${riskLevel.toUpperCase()}
-                        </span>
-                    </div>
-                    ${risk.factors && risk.factors.length > 0 ? `
-                        <div style="font-size:13px;color:var(--text-light);margin-top:6px;">
-                            Factors: ${risk.factors.join(' • ')}
-                        </div>
-                    ` : ''}
-                </div>
-            `;
-
-            const pam = insights.pam_trajectory || {};
-            html += `
-                <div style="padding:14px 16px;border-left:4px solid var(--primary);background:#FAFAFA;border-radius:8px;margin-bottom:14px;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-                        <div>
-                            <strong>PAM Prediction</strong>
-                            <div style="font-size:13px;color:var(--text-light);">Predicted: ${pam.predicted_score || '--'} • Trend: ${pam.trend || 'Stable'}</div>
-                        </div>
-                        <span class="status ${pam.trend === 'improving' ? 'achieved' : pam.trend === 'declining' ? 'planned' : 'in_progress'}">
-                            ${(pam.trend || 'Stable').toUpperCase()}
-                        </span>
-                    </div>
-                    ${pam.trajectory && pam.trajectory.length > 0 ? `
-                        <div style="margin-top:8px;display:flex;gap:4px;align-items:flex-end;height:40px;">
-                            ${pam.trajectory.slice(0,10).map((p, i) => `
-                                <div style="flex:1;background:var(--primary);height:${(p/100)*40}px;border-radius:2px;min-height:4px;opacity:${0.4 + (i/pam.trajectory.length)*0.6};"></div>
-                            `).join('')}
-                        </div>
-                    ` : ''}
-                </div>
-            `;
-
-            const recs = insights.recommendations || [];
-            if (recs.length > 0) {
-                html += `<h4 style="margin:14px 0 10px;font-size:15px;">💡 Recommendations</h4>`;
-                recs.forEach(rec => {
-                    html += `
-                        <div class="insight-item">
-                            <div class="title">${rec.name}</div>
-                            <div class="desc">${rec.justification || ''}</div>
-                            <span class="priority ${rec.priority === 1 ? 'high' : rec.priority === 2 ? 'medium' : 'low'}">
-                                Priority ${rec.priority || 3}
-                            </span>
-                        </div>
-                    `;
-                });
-            }
-
-            const domains = insights.domain_scores || {};
-            if (Object.keys(domains).length > 0) {
-                html += `<h4 style="margin:14px 0 10px;font-size:15px;">📊 Domain Scores</h4>`;
-                Object.entries(domains).forEach(([domain, score]) => {
-                    const pct = Math.min((score / 10 * 100), 100);
-                    const color = pct < 40 ? 'var(--danger)' : pct < 60 ? 'var(--warning)' : 'var(--success)';
-                    html += `
-                        <div style="margin:6px 0;">
-                            <div style="display:flex;justify-content:space-between;font-size:13px;">
-                                <span>${domain.replace('_', ' ').toUpperCase()}</span>
-                                <span>${score.toFixed(1)}/10</span>
-                            </div>
-                            <div style="height:6px;background:var(--gray);border-radius:3px;overflow:hidden;">
-                                <div style="height:100%;width:${pct}%;background:${color};border-radius:3px;transition:width 0.8s ease;"></div>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-
-            const sentiment = insights.sentiment_analysis || {};
-            if (sentiment.classification) {
-                html += `
-                    <div style="margin-top:14px;padding:12px 16px;background:#FAFAFA;border-radius:8px;">
-                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-                            <span><strong>💭 Sentiment Analysis</strong></span>
-                            <span class="status ${sentiment.classification === 'positive' ? 'achieved' : sentiment.classification === 'negative' ? 'planned' : 'in_progress'}">
-                                ${sentiment.classification.toUpperCase()}
-                            </span>
-                        </div>
-                        <div style="display:flex;gap:16px;margin-top:6px;font-size:13px;color:var(--text-light);">
-                            <span>Positive: ${((sentiment.positive_ratio || 0) * 100).toFixed(0)}%</span>
-                            <span>Negative: ${((sentiment.negative_ratio || 0) * 100).toFixed(0)}%</span>
-                            <span>Neutral: ${((sentiment.neutral_ratio || 0) * 100).toFixed(0)}%</span>
-                        </div>
-                    </div>
-                `;
-            }
-
-            container.innerHTML = html;
-        }
-
-        function renderSettings() {
-            const select = document.getElementById('patientSelect');
-            select.innerHTML = App.patients.map(p =>
-                `<option value="${p.nhs_number}" ${p.nhs_number === App.currentPatient ? 'selected' : ''}>
-                    ${p.name} (${p.nhs_number})
-                </option>`
-            ).join('');
-        }
-
-        function getPamLevelText(level) {
-            const levels = {
-                1: 'Not yet activated',
-                2: 'Becoming activated',
-                3: 'Taking action',
-                4: 'Maintaining behaviours'
-            };
-            return levels[level] || 'Unknown';
-        }
-
-        function navigateTo(view) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-
-            const viewEl = document.getElementById('view-' + view);
-            if (viewEl) viewEl.classList.add('active');
-
-            const navEl = document.querySelector(`.nav-item[data-view="${view}"]`);
-            if (navEl) navEl.classList.add('active');
-
-            const titles = {
-                dashboard: ['Dashboard', 'Overview of your personalised care'],
-                patients: ['Patients', 'Manage your patient list'],
-                goals: ['Goals', 'Track your health goals'],
-                outcomes: ['Outcomes', 'Monitor health metrics'],
-                insights: ['AI Insights', 'Intelligent health predictions'],
-                notes: ['Notes', 'Clinical documentation'],
-                settings: ['Settings', 'Application configuration']
-            };
-
-            const [title, subtitle] = titles[view] || ['Dashboard', ''];
-            document.getElementById('pageTitle').textContent = title;
-            document.getElementById('pageSubtitle').textContent = subtitle;
-
-            App.activeView = view;
-            closeModal();
-
-            if (view === 'dashboard') renderDashboard();
-            if (view === 'goals') renderGoals();
-            if (view === 'patients') renderPatients();
-            if (view === 'outcomes') renderOutcomes();
-            if (view === 'notes') renderNotes();
-            if (view === 'insights') renderInsights();
-        }
-
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
-        }
-
-        function selectPatient(nhsNumber) {
-            App.currentPatient = nhsNumber;
-            document.getElementById('sidebar').classList.remove('open');
-            showToast('👤 Patient Selected', 'Switched to ' + nhsNumber, 'info');
-            loadData();
-        }
-
-        function changePatient() {
-            selectPatient(document.getElementById('patientSelect').value);
-        }
-
-        function searchPatients() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const rows = document.querySelectorAll('#patientTableBody tr');
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(query) ? '' : 'none';
-            });
-        }
-
-        function showModal(type, id = null) {
-            const overlay = document.getElementById('modalOverlay');
-            const body = document.getElementById('modalBody');
-            let html = '';
-
-            switch (type) {
-                case 'addPatient':
-                    html = `
-                        <h2>Add New Patient</h2>
-                        <form onsubmit="addPatient(event)">
-                            <div class="form-group">
-                                <label>NHS Number *</label>
-                                <input type="text" id="newNhsNumber" placeholder="NHS123456" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Full Name *</label>
-                                <input type="text" id="newName" placeholder="John Doe" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Date of Birth *</label>
-                                <input type="date" id="newDob" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Gender</label>
-                                <select id="newGender">
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Add Patient</button>
-                            <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
-                        </form>
-                    `;
-                    break;
-
-                case 'addGoal':
-                    html = `
-                        <h2>New Goal</h2>
-                        <form onsubmit="addGoal(event)">
-                            <div class="form-group">
-                                <label>Description *</label>
-                                <input type="text" id="goalDesc" placeholder="What do you want to achieve?" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Domain</label>
-                                <select id="goalDomain">
-                                    <option value="physical_health">Physical Health</option>
-                                    <option value="mental_health">Mental Health</option>
-                                    <option value="social_wellbeing">Social Wellbeing</option>
-                                    <option value="financial_security">Financial Security</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Steps (comma separated)</label>
-                                <input type="text" id="goalSteps" placeholder="Step 1, Step 2, Step 3">
-                            </div>
-                            <div class="form-group">
-                                <label>Target Date</label>
-                                <input type="date" id="goalDate">
-                            </div>
-                            <button type="submit" class="btn btn-primary">Create Goal</button>
-                            <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
-                        </form>
-                    `;
-                    break;
-
-                case 'addOutcome':
-                    html = `
-                        <h2>Record Outcome</h2>
-                        <form onsubmit="addOutcome(event)">
-                            <div class="form-group">
-                                <label>Metric Name *</label>
-                                <input type="text" id="outcomeMetric" placeholder="Blood Pressure" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Domain</label>
-                                <select id="outcomeDomain">
-                                    <option value="physical_health">Physical Health</option>
-                                    <option value="mental_health">Mental Health</option>
-                                    <option value="social_wellbeing">Social Wellbeing</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Value *</label>
-                                <input type="number" id="outcomeValue" step="0.1" placeholder="Current value" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Target Value (optional)</label>
-                                <input type="number" id="outcomeTarget" step="0.1" placeholder="Target value">
-                            </div>
-                            <button type="submit" class="btn btn-primary">Record Outcome</button>
-                            <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
-                        </form>
-                    `;
-                    break;
-
-                case 'addNote':
-                    html = `
-                        <h2>Add Clinical Note</h2>
-                        <form onsubmit="addNote(event)">
-                            <div class="form-group">
-                                <label>Note *</label>
-                                <textarea id="noteText" placeholder="Enter clinical note..." required></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label>Author</label>
-                                <input type="text" id="noteAuthor" placeholder="Dr. Smith">
-                            </div>
-                            <button type="submit" class="btn btn-primary">Save Note</button>
-                            <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
-                        </form>
-                    `;
-                    break;
-
-                case 'editGoal':
-                    const goal = App.goals.find(g => g.goal_id === id);
-                    if (!goal) return;
-                    html = `
-                        <h2>Edit Goal</h2>
-                        <form onsubmit="updateGoal(event, '${id}')">
-                            <div class="form-group">
-                                <label>Description</label>
-                                <input type="text" id="editGoalDesc" value="${goal.description}" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Status</label>
-                                <select id="editGoalStatus">
-                                    <option value="planned" ${goal.status === 'planned' ? 'selected' : ''}>Planned</option>
-                                    <option value="in_progress" ${goal.status === 'in_progress' ? 'selected' : ''}>In Progress</option>
-                                    <option value="achieved" ${goal.status === 'achieved' ? 'selected' : ''}>Achieved</option>
-                                    <option value="partially_achieved" ${goal.status === 'partially_achieved' ? 'selected' : ''}>Partially Achieved</option>
-                                    <option value="abandoned" ${goal.status === 'abandoned' ? 'selected' : ''}>Abandoned</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Steps (comma separated)</label>
-                                <input type="text" id="editGoalSteps" value="${(goal.steps || []).join(', ')}">
-                            </div>
-                            <button type="submit" class="btn btn-primary">Update Goal</button>
-                            <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
-                        </form>
-                    `;
-                    break;
-
-                default:
-                    html = '<p>Unknown action</p>';
-            }
-
-            body.innerHTML = html;
-            overlay.classList.add('active');
-        }
-
-        function closeModal() {
-            document.getElementById('modalOverlay').classList.remove('active');
-        }
-
-        async function addPatient(e) {
-            e.preventDefault();
-            const data = {
-                nhs_number: document.getElementById('newNhsNumber').value,
-                name: document.getElementById('newName').value,
-                date_of_birth: document.getElementById('newDob').value,
-                gender: document.getElementById('newGender').value
-            };
-
-            try {
-                const res = await fetch(API_URL + '/person', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                const result = await res.json();
-                if (result.success) {
-                    showToast('✅ Patient Added', 'Patient registered successfully', 'success');
-                    closeModal();
-                    loadData();
-                } else {
-                    showToast('❌ Error', result.error || 'Failed to add patient', 'error');
-                }
-            } catch (error) {
-                showToast('❌ Error', error.message, 'error');
-            }
-        }
-
-        async function addGoal(e) {
-            e.preventDefault();
-            const planRes = await fetch(API_URL + '/plan/' + App.currentPatient);
-            const planData = await planRes.json();
-            const planId = planData.data?.plan?.plan_id || 'plan-' + Date.now();
-
-            const data = {
-                person_id: App.currentPatient,
-                plan_id: planId,
-                description: document.getElementById('goalDesc').value,
-                domain: document.getElementById('goalDomain').value,
-                steps: document.getElementById('goalSteps').value.split(',').map(s => s.trim()).filter(Boolean),
-                target_date: document.getElementById('goalDate').value || null
-            };
-
-            try {
-                const res = await fetch(API_URL + '/goal', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                const result = await res.json();
-                if (result.success) {
-                    showToast('✅ Goal Added', 'Goal created successfully', 'success');
-                    closeModal();
-                    loadData();
-                } else {
-                    showToast('❌ Error', result.error || 'Failed to add goal', 'error');
-                }
-            } catch (error) {
-                showToast('❌ Error', error.message, 'error');
-            }
-        }
-
-        async function updateGoal(e, goalId) {
-            e.preventDefault();
-            const data = {
-                description: document.getElementById('editGoalDesc').value,
-                status: document.getElementById('editGoalStatus').value,
-                steps: document.getElementById('editGoalSteps').value.split(',').map(s => s.trim()).filter(Boolean)
-            };
-
-            try {
-                const res = await fetch(API_URL + '/goal/' + goalId, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                const result = await res.json();
-                if (result.success) {
-                    showToast('✅ Goal Updated', 'Goal updated successfully', 'success');
-                    closeModal();
-                    loadData();
-                } else {
-                    showToast('❌ Error', result.error || 'Failed to update goal', 'error');
-                }
-            } catch (error) {
-                showToast('❌ Error', error.message, 'error');
-            }
-        }
-
-        async function addOutcome(e) {
-            e.preventDefault();
-            const planRes = await fetch(API_URL + '/plan/' + App.currentPatient);
-            const planData = await planRes.json();
-            const planId = planData.data?.plan?.plan_id || 'plan-' + Date.now();
-
-            const data = {
-                person_id: App.currentPatient,
-                plan_id: planId,
-                domain: document.getElementById('outcomeDomain').value,
-                metric_name: document.getElementById('outcomeMetric').value,
-                value: parseFloat(document.getElementById('outcomeValue').value),
-                target_value: parseFloat(document.getElementById('outcomeTarget').value) || null
-            };
-
-            try {
-                const res = await fetch(API_URL + '/outcome', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                const result = await res.json();
-                if (result.success) {
-                    showToast('✅ Outcome Recorded', 'Health metric recorded successfully', 'success');
-                    closeModal();
-                    loadData();
-                } else {
-                    showToast('❌ Error', result.error || 'Failed to record outcome', 'error');
-                }
-            } catch (error) {
-                showToast('❌ Error', error.message, 'error');
-            }
-        }
-
-        async function addNote(e) {
-            e.preventDefault();
-            const data = {
-                person_id: App.currentPatient,
-                note_text: document.getElementById('noteText').value,
-                author: document.getElementById('noteAuthor').value || 'Unknown'
-            };
-
-            try {
-                const res = await fetch(API_URL + '/note', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                const result = await res.json();
-                if (result.success) {
-                    showToast('✅ Note Added', 'Clinical note saved', 'success');
-                    closeModal();
-                    loadData();
-                } else {
-                    showToast('❌ Error', result.error || 'Failed to save note', 'error');
-                }
-            } catch (error) {
-                showToast('❌ Error', error.message, 'error');
-            }
-        }
-
-        function filterGoals() {
-            renderGoals();
-        }
-
-        function refreshData() {
-            showToast('🔄 Refreshing', 'Loading latest data...', 'info');
-            loadData();
-        }
-
-        function exportData() {
-            const data = {
-                patient: App.currentPatient,
-                goals: App.goals,
-                outcomes: App.outcomes,
-                pamScores: App.pamScores,
-                notes: App.notes,
-                insights: App.insights,
-                exportedAt: new Date().toISOString()
-            };
-
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `nhs_data_${App.currentPatient}_${Date.now()}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            showToast('📤 Exported', 'Data exported successfully', 'success');
-        }
-
-        function clearData() {
-            if (!confirm('⚠️ Delete all data for this patient?')) return;
-            if (!confirm('This action cannot be undone!')) return;
-
-            App.goals = [];
-            App.outcomes = [];
-            App.pamScores = [];
-            App.notes = [];
-            App.insights = {};
-
-            renderAll();
-            showToast('🗑️ Cleared', 'All data has been cleared', 'info');
-        }
-
-        function showToast(title, message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `
-                <span style="font-size:18px;">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
-                <div>
-                    <strong>${title}</strong>
-                    <div style="font-size:13px;opacity:0.9;">${message}</div>
-                </div>
-            `;
-            container.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(100%)';
-                setTimeout(() => toast.remove(), 400);
-            }, 4000);
-        }
-
-        function showLoading() {
-            const existing = document.querySelector('.loading-overlay');
-            if (existing) return;
-
-            const overlay = document.createElement('div');
-            overlay.className = 'loading-overlay';
-            overlay.innerHTML = `
-                <div style="text-align:center;">
-                    <div class="spinner" style="margin:0 auto;"></div>
-                    <div style="margin-top:12px;color:var(--text-light);">Loading...</div>
-                </div>
-            `;
-            document.body.appendChild(overlay);
-        }
-
-        function hideLoading() {
-            const overlay = document.querySelector('.loading-overlay');
-            if (overlay) overlay.remove();
-        }
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
-                .then(() => console.log('Service Worker registered'))
-                .catch(err => console.log('SW registration failed:', err));
-        }
-
-        let deferredPrompt;
+        // Listen for beforeinstallprompt event
         window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67+ from automatically showing the prompt
             e.preventDefault();
+            
+            // Stash the event so it can be triggered later
             deferredPrompt = e;
-            showToast('📱 Install App', 'Install NHS Personalised Care for offline access', 'info');
-        });
-
-        console.log('🏥 NHS Personalised Care System Loaded');
-        console.log('📱 Version 2.0');
-        console.log('👤 Patient:', App.currentPatient);
-        console.log('💡 Use the sidebar to navigate');
-
-        document.addEventListener('click', function(e) {
-            const sidebar = document.getElementById('sidebar');
-            const toggle = document.querySelector('.mobile-toggle');
-            if (window.innerWidth <= 768 &&
-                !sidebar.contains(e.target) &&
-                !toggle.contains(e.target) &&
-                sidebar.classList.contains('open')) {
-                sidebar.classList.remove('open');
+            
+            // Show the install banner
+            const banner = document.getElementById('installBanner');
+            if (!isAppInstalled) {
+                banner.classList.add('show');
             }
         });
+
+        // Install button click handler
+        document.getElementById('installBtn').addEventListener('click', async () => {
+            if (!deferredPrompt) {
+                // If no deferred prompt, try to show the native prompt
+                showToast('ℹ️', 'Tap the menu (3 dots) and select "Install App"', 'info');
+                return;
+            }
+            
+            // Show the install prompt
+            deferredPrompt.prompt();
+            
+            // Wait for the user to respond to the prompt
+            const result = await deferredPrompt.userChoice;
+            
+            if (result.outcome === 'accepted') {
+                // User accepted the install
+                isAppInstalled = true;
+                document.getElementById('installBanner').classList.remove('show');
+                showToast('✅ Installed', 'App installed successfully!', 'success');
+            } else {
+                // User dismissed the install
+                showToast('ℹ️', 'You can install later from the browser menu', 'info');
+            }
+            
+            // Clear the deferred prompt
+            deferredPrompt = null;
+        });
+
+        // Close install banner
+        document.getElementById('closeInstallBanner').addEventListener('click', () => {
+            document.getElementById('installBanner').classList.remove('show');
+        });
+
+        // Listen for app installed event (Chrome)
+        window.addEventListener('appinstalled', () => {
+            isAppInstalled = true;
+            document.getElementById('installBanner').classList.remove('show');
+            showToast('🎉', 'App installed successfully!', 'success');
+        });
+
+        // ================================================================
+        // SERVICE WORKER REGISTRATION
+        // ================================================================
+        
+        if ('serviceWorker' in navigator) {
+            // Register service worker
+            navigator.serviceWorker.register('/sw.js')
+                .then((registration) => {
+                    console.log('✅ Service Worker registered successfully');
+                    
+                    // Check for updates
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        console.log('🔄 New Service Worker found');
+                        
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                showToast('🔄 Update', 'New version available. Refresh to update.', 'info');
+                            }
+                        });
+                    });
+                })
+                .catch((err) => {
+                    console.log('❌ Service Worker registration failed:', err);
+                });
+            
+            // Check if there's a waiting service worker
+            navigator.serviceWorker.ready.then((registration) => {
+                if (registration.waiting) {
+                    // There's a waiting service worker, prompt user to update
+                    showToast('🔄 Update', 'New version available. Click refresh to update.', 'info');
+                }
+            });
+        }
+
+        // ================================================================
+        // PUSH NOTIFICATIONS (if supported)
+        // ================================================================
+        
+        if ('Notification' in window && 'serviceWorker' in navigator) {
+            // Request permission on user interaction
+            document.addEventListener('click', () => {
+                if (Notification.permission === 'default') {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === 'granted') {
+                            console.log('🔔 Push notifications enabled');
+                        }
+                    });
+                }
+            });
+        }
+
+        // ================================================================
+        // OFFLINE STATUS INDICATOR
+        // ================================================================
+        
+        window.addEventListener('online', () => {
+            showToast('📶 Online', 'Connection restored. Refreshing data...', 'success');
+            loadData();
+        });
+        
+        window.addEventListener('offline', () => {
+            showToast('📶 Offline', 'You are offline. Some features may not work.', 'error');
+        });
+
+        // Check initial online status
+        if (!navigator.onLine) {
+            setTimeout(() => {
+                showToast('📶 Offline', 'You are offline. Data may not be up to date.', 'error');
+            }, 1000);
+        }
+
+        // ================================================================
+        // PWA INSTALL CHECK (for Chrome Android)
+        // ================================================================
+        
+        // Check if already in standalone mode
+        if (window.navigator.standalone) {
+            // iOS Safari standalone
+            isAppInstalled = true;
+            document.getElementById('installBanner').classList.remove('show');
+        }
+
+        // For Android, check display mode via media query
+        const displayMode = window.matchMedia('(display-mode: standalone)');
+        displayMode.addEventListener('change', (e) => {
+            if (e.matches) {
+                isAppInstalled = true;
+                document.getElementById('installBanner').classList.remove('show');
+            }
+        });
+
+        console.log('📱 PWA Installation features loaded');
+        console.log('📲 App installed:', isAppInstalled);
     </script>
 </body>
 </html>

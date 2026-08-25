@@ -2,36 +2,73 @@
   "name": "NHS Personalised Care",
   "short_name": "NHS Care",
   "description": "NHS England Comprehensive Model for Personalised Care",
-  "start_url": "/",
+  "start_url": "/?utm_source=pwa",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#005EB8",
   "theme_color": "#005EB8",
+  "categories": ["health", "medical", "lifestyle"],
+  "screenshots": [
+    {
+      "src": "/screenshots/dashboard.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "label": "Dashboard Overview"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Home",
+      "description": "View your health dashboard",
+      "url": "/?view=dashboard",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Goals",
+      "short_name": "Goals",
+      "description": "View and manage your goals",
+      "url": "/?view=goals",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Add Note",
+      "short_name": "Note",
+      "description": "Add a clinical note",
+      "url": "/?view=notes",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    }
+  ],
   "icons": [
     {
       "src": "/icons/icon-72.png",
       "sizes": "72x72",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icons/icon-96.png",
       "sizes": "96x96",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icons/icon-128.png",
       "sizes": "128x128",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icons/icon-144.png",
       "sizes": "144x144",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icons/icon-152.png",
       "sizes": "152x152",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icons/icon-192.png",
@@ -42,7 +79,8 @@
     {
       "src": "/icons/icon-384.png",
       "sizes": "384x384",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icons/icon-512.png",
@@ -50,5 +88,7 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "prefer_related_applications": false,
+  "related_applications": []
 }
