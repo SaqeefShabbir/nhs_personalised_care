@@ -1,0 +1,13 @@
+┌─────────────────────────────────────────────┐
+│  📝 CLINICAL NOTES            [+ Add Note]  │
+│  ┌─────────────────────────────────────────┐│
+│  │ Feeling more energetic. Walking        ││
+│  │ 20 minutes daily. Knee pain improving. ││
+│  │ Dr. Smith  •  Jan 15, 2024   😊 Positive││
+│  └─────────────────────────────────────────┘│
+│  ┌─────────────────────────────────────────┐│
+│  │ Blood pressure slightly elevated.      ││
+│  │ Need to reduce salt intake.            ││
+│  │ Dr. Jones  •  Jan 13, 2024  😐 Neutral ││
+│  └─────────────────────────────────────────┘│
+└─────────────────────────────────────────────┘

@@ -1,0 +1,12 @@
+Install dependencies: pip install -r requirements.txt
+
+Start server: python nhs_care_server.py
+
+Open browser: http://localhost:5000
+
+Login with NHS number: NHS123456
+
+NHS Number	Name	Role
+NHS123456	Sarah Johnson	Patient
+NHS789012	James Smith	Patient
+NHS345678	Aisha Patel	Patient

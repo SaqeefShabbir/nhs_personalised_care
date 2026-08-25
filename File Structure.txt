@@ -1,0 +1,38 @@
+nhs_personalised_care/
+│
+├── nhs_care_server.py          # Main Flask server
+├── requirements.txt             # Python dependencies
+├── start.bat                    # Windows startup
+├── start.sh                     # Linux/Mac startup
+├── generate_icons.py            # Icon generator
+│
+├── templates/
+│   └── index.html               # Complete UI (provided earlier)
+│
+├── static/
+│   ├── manifest.json            # PWA manifest
+│   ├── sw.js                    # Service Worker
+│   └── icons/
+│       ├── icon-72.png
+│       ├── icon-96.png
+│       ├── icon-128.png
+│       ├── icon-144.png
+│       ├── icon-152.png
+│       ├── icon-192.png
+│       ├── icon-384.png
+│       └── icon-512.png
+│
+├── screenshots/
+│   ├── dashboard.png
+│   ├── goals.png
+│   ├── insights.png
+│   ├── notes.png
+│   ├── outcomes.png
+│   ├── patients.png
+│   └── settings.png
+│
+├── docs/
+│   └── USER_GUIDE.md
+│
+└── tests/
+    └── test_api.py
