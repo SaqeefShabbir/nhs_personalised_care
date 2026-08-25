@@ -1,750 +1,378 @@
 """
-NHS Personalised Care System - Complete Flask Application
-For Vercel Deployment
+NHS Personalised Care - Minimal Vercel Version
+No database, uses in-memory storage
 """
 
 import sys
-import os
 import json
 import uuid
-import sqlite3
 from datetime import datetime
-from flask import Flask, jsonify, request, send_from_directory, render_template_string
+from flask import Flask, jsonify, request
 
-# ==================== APP INITIALIZATION ====================
-app = Flask(__name__, static_folder='static', template_folder='templates')
+app = Flask(__name__)
 
-# ==================== DATABASE ====================
-class Database:
-    def __init__(self):
-        self.db_path = "nhs_care.db"
-        self._initialize_database()
-    
-    def _initialize_database(self):
-        """Create tables if they don't exist"""
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-            
-            # Persons table
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS persons (
-                    nhs_number TEXT PRIMARY KEY,
-                    name TEXT NOT NULL,
-                    date_of_birth TEXT NOT NULL,
-                    gender TEXT,
-                    ethnicity TEXT,
-                    preferred_language TEXT DEFAULT 'English',
-                    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-                    is_active INTEGER DEFAULT 1
-                )
-            ''')
-            
-            # Care Plans table
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS care_plans (
-                    plan_id TEXT PRIMARY KEY,
-                    person_id TEXT NOT NULL,
-                    version INTEGER DEFAULT 1,
-                    status TEXT DEFAULT 'active',
-                    created_date TEXT DEFAULT CURRENT_TIMESTAMP,
-                    updated_date TEXT DEFAULT CURRENT_TIMESTAMP,
-                    review_date TEXT,
-                    clinical_summary TEXT,
-                    FOREIGN KEY (person_id) REFERENCES persons(nhs_number)
-                )
-            ''')
-            
-            # Goals table
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS goals (
-                    goal_id TEXT PRIMARY KEY,
-                    person_id TEXT NOT NULL,
-                    plan_id TEXT NOT NULL,
-                    description TEXT NOT NULL,
-                    domain TEXT NOT NULL,
-                    status TEXT DEFAULT 'planned',
-                    target_date TEXT,
-                    created_date TEXT DEFAULT CURRENT_TIMESTAMP,
-                    updated_date TEXT DEFAULT CURRENT_TIMESTAMP,
-                    steps TEXT,
-                    barriers TEXT,
-                    enablers TEXT,
-                    completion_date TEXT,
-                    notes TEXT,
-                    FOREIGN KEY (person_id) REFERENCES persons(nhs_number),
-                    FOREIGN KEY (plan_id) REFERENCES care_plans(plan_id)
-                )
-            ''')
-            
-            # Outcomes table
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS outcomes (
-                    outcome_id TEXT PRIMARY KEY,
-                    person_id TEXT NOT NULL,
-                    plan_id TEXT NOT NULL,
-                    domain TEXT NOT NULL,
-                    metric_name TEXT NOT NULL,
-                    value REAL,
-                    target_value REAL,
-                    date_recorded TEXT DEFAULT CURRENT_TIMESTAMP,
-                    self_reported INTEGER DEFAULT 1,
-                    notes TEXT,
-                    FOREIGN KEY (person_id) REFERENCES persons(nhs_number),
-                    FOREIGN KEY (plan_id) REFERENCES care_plans(plan_id)
-                )
-            ''')
-            
-            # PAM Scores table
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS pam_scores (
-                    pam_id TEXT PRIMARY KEY,
-                    person_id TEXT NOT NULL,
-                    score INTEGER NOT NULL,
-                    level INTEGER,
-                    date_taken TEXT DEFAULT CURRENT_TIMESTAMP,
-                    notes TEXT,
-                    FOREIGN KEY (person_id) REFERENCES persons(nhs_number)
-                )
-            ''')
-            
-            # Clinical Notes table
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS clinical_notes (
-                    note_id TEXT PRIMARY KEY,
-                    person_id TEXT NOT NULL,
-                    author TEXT,
-                    note_text TEXT NOT NULL,
-                    sentiment_score REAL,
-                    entities TEXT,
-                    summary TEXT,
-                    date_created TEXT DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (person_id) REFERENCES persons(nhs_number)
-                )
-            ''')
-            
-            # Decisions table
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS decisions (
-                    decision_id TEXT PRIMARY KEY,
-                    person_id TEXT NOT NULL,
-                    topic TEXT NOT NULL,
-                    options TEXT,
-                    chosen_option TEXT,
-                    preference_mode TEXT,
-                    decision_date TEXT DEFAULT CURRENT_TIMESTAMP,
-                    notes TEXT,
-                    FOREIGN KEY (person_id) REFERENCES persons(nhs_number)
-                )
-            ''')
-            
-            # AI Predictions table
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS ai_predictions (
-                    prediction_id TEXT PRIMARY KEY,
-                    person_id TEXT NOT NULL,
-                    prediction_type TEXT NOT NULL,
-                    prediction_data TEXT,
-                    confidence REAL,
-                    created_date TEXT DEFAULT CURRENT_TIMESTAMP,
-                    expires_date TEXT,
-                    FOREIGN KEY (person_id) REFERENCES persons(nhs_number)
-                )
-            ''')
-            
-            conn.commit()
-            print("✅ Database initialized successfully")
-    
-    def execute_query(self, query, params=()):
-        with sqlite3.connect(self.db_path) as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            cursor.execute(query, params)
-            return [dict(row) for row in cursor.fetchall()]
-    
-    def execute_update(self, query, params=()):
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute(query, params)
-            conn.commit()
-            return cursor.rowcount
+# In-memory storage (data will reset on each deployment)
+mock_data = {
+    "persons": {
+        "NHS123456": {
+            "nhs_number": "NHS123456",
+            "name": "Sarah Johnson",
+            "date_of_birth": "1965-05-15",
+            "gender": "Female"
+        },
+        "NHS789012": {
+            "nhs_number": "NHS789012",
+            "name": "James Smith",
+            "date_of_birth": "1978-03-22",
+            "gender": "Male"
+        }
+    },
+    "goals": {
+        "NHS123456": [
+            {"goal_id": "1", "description": "Walk 30 minutes daily", "domain": "physical_health", "status": "in_progress"},
+            {"goal_id": "2", "description": "Join community walking group", "domain": "social_wellbeing", "status": "planned"}
+        ],
+        "NHS789012": [
+            {"goal_id": "3", "description": "Reduce blood pressure", "domain": "physical_health", "status": "planned"}
+        ]
+    },
+    "outcomes": {
+        "NHS123456": [
+            {"metric_name": "Blood Pressure", "value": 135, "target_value": 120, "domain": "physical_health"},
+            {"metric_name": "Heart Rate", "value": 82, "target_value": 70, "domain": "physical_health"}
+        ]
+    },
+    "pam_scores": {
+        "NHS123456": [
+            {"score": 45, "level": 1},
+            {"score": 52, "level": 2},
+            {"score": 58, "level": 3},
+            {"score": 62, "level": 3}
+        ]
+    },
+    "notes": {
+        "NHS123456": [
+            {"note_text": "Feeling more energetic", "author": "Dr. Smith", "sentiment_score": 0.3},
+            {"note_text": "Blood pressure slightly elevated", "author": "Dr. Smith", "sentiment_score": -0.1}
+        ]
+    },
+    "plans": {}
+}
 
-# Initialize database
-db = Database()
-
-# ==================== LOAD DASHBOARD HTML ====================
-def load_dashboard_html():
-    try:
-        with open('templates/index.html', 'r', encoding='utf-8') as f:
-            return f.read()
-    except FileNotFoundError:
-        # Fallback HTML
-        return """
-        <!DOCTYPE html>
-        <html>
-        <head><title>NHS Personalised Care</title></head>
-        <body>
-            <h1>🏥 NHS Personalised Care</h1>
-            <p>Dashboard loaded. API is running.</p>
-            <p><a href="/api/health">Health Check</a></p>
-        </body>
-        </html>
-        """
-
-DASHBOARD_HTML = load_dashboard_html()
-
-# ==================== ROUTES ====================
-
-# --- Frontend ---
-@app.route('/')
-def home():
-    return DASHBOARD_HTML
-
-@app.route('/static/<path:filename>')
-def serve_static(filename):
-    return send_from_directory('static', filename)
-
-@app.route('/templates/<path:filename>')
-def serve_templates(filename):
-    return send_from_directory('templates', filename)
-
-# --- Health Check ---
+# ==================== HEALTH CHECK ====================
 @app.route('/api/health')
 def health():
     return jsonify({
         "status": "healthy",
         "deployment": "vercel",
-        "python_version": sys.version,
-        "database": "connected"
+        "python_version": sys.version
     })
 
-# --- Person Management ---
-@app.route('/api/person/<nhs_number>', methods=['GET'])
-def get_person(nhs_number):
-    try:
-        person = db.execute_query(
-            "SELECT * FROM persons WHERE nhs_number = ?", (nhs_number,)
-        )
-        if person:
-            return jsonify({"success": True, "data": person[0]})
-        else:
-            # Return mock data for demo
-            return jsonify({
-                "success": True,
-                "data": {
-                    "nhs_number": nhs_number,
-                    "name": "Demo Patient",
-                    "date_of_birth": "1970-01-01",
-                    "gender": "Unknown",
-                    "ethnicity": "Not specified",
-                    "preferred_language": "English"
+# ==================== DASHBOARD ====================
+@app.route('/')
+def home():
+    # Return minimal HTML
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>NHS Personalised Care</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body { font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 20px; background: #f5f7fa; }
+            .header { background: #005EB8; color: white; padding: 20px; border-radius: 12px; text-align: center; }
+            .card { background: white; padding: 16px; border-radius: 12px; margin: 12px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+            .score { font-size: 48px; font-weight: bold; color: #005EB8; text-align: center; }
+            .btn { background: #005EB8; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 16px; cursor: pointer; width: 100%; margin: 4px 0; }
+            .btn:hover { opacity: 0.9; }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>🏥 NHS Personalised Care</h1>
+            <p>NHS England</p>
+        </div>
+        <div class="card">
+            <h3>Patient Activation Measure</h3>
+            <div class="score" id="pamScore">--</div>
+            <p style="text-align:center;color:#666;" id="pamLevel">Loading...</p>
+        </div>
+        <div class="card">
+            <h3>🎯 Goals</h3>
+            <div id="goalsList">Loading...</div>
+        </div>
+        <div class="card">
+            <button class="btn" onclick="loadData()">🔄 Refresh</button>
+        </div>
+        <script>
+            const API_URL = '';
+            let personId = 'NHS123456';
+            
+            async function loadData() {
+                try {
+                    // Load PAM
+                    const pamRes = await fetch(API_URL + '/api/pam/' + personId);
+                    const pamData = await pamRes.json();
+                    if (pamData.success && pamData.data && pamData.data.length > 0) {
+                        const latest = pamData.data[pamData.data.length - 1];
+                        document.getElementById('pamScore').textContent = latest.score;
+                        document.getElementById('pamLevel').textContent = 'Level ' + (latest.level || '1');
+                    }
+                    
+                    // Load Goals
+                    const goalsRes = await fetch(API_URL + '/api/goals/' + personId);
+                    const goalsData = await goalsRes.json();
+                    if (goalsData.success && goalsData.data) {
+                        const html = goalsData.data.map(g => 
+                            '<div style="padding:8px 0;border-bottom:1px solid #eee;">' +
+                            '<strong>' + g.description + '</strong>' +
+                            '<span style="float:right;color:#666;font-size:12px;">' + g.status + '</span>' +
+                            '</div>'
+                        ).join('');
+                        document.getElementById('goalsList').innerHTML = html || 'No goals set';
+                    }
+                } catch (e) {
+                    console.error('Error:', e);
+                    document.getElementById('goalsList').textContent = 'Error loading data';
                 }
-            })
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+            }
+            
+            loadData();
+        </script>
+    </body>
+    </html>
+    """
+
+# ==================== PERSON ====================
+@app.route('/api/person/<nhs_number>')
+def get_person(nhs_number):
+    person = mock_data["persons"].get(nhs_number)
+    if person:
+        return jsonify({"success": True, "data": person})
+    return jsonify({"success": True, "data": {"nhs_number": nhs_number, "name": "Demo Patient"}})
 
 @app.route('/api/person', methods=['POST'])
 def create_person():
-    try:
-        data = request.json
-        required = ['nhs_number', 'name', 'date_of_birth']
-        for field in required:
-            if field not in data:
-                return jsonify({"success": False, "error": f"Missing required field: {field}"}), 400
-        
-        existing = db.execute_query(
-            "SELECT * FROM persons WHERE nhs_number = ?", (data['nhs_number'],)
-        )
-        if existing:
-            return jsonify({"success": False, "error": "Person already exists"}), 409
-        
-        query = '''
-            INSERT INTO persons (nhs_number, name, date_of_birth, gender, ethnicity, preferred_language)
-            VALUES (?, ?, ?, ?, ?, ?)
-        '''
-        db.execute_update(query, (
-            data['nhs_number'],
-            data['name'],
-            data['date_of_birth'],
-            data.get('gender', ''),
-            data.get('ethnicity', ''),
-            data.get('preferred_language', 'English')
-        ))
-        
-        # Create care plan
-        plan_id = str(uuid.uuid4())
-        db.execute_update(
-            "INSERT INTO care_plans (plan_id, person_id) VALUES (?, ?)",
-            (plan_id, data['nhs_number'])
-        )
-        
-        return jsonify({"success": True, "nhs_number": data['nhs_number']})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+    data = request.json
+    nhs_number = data.get('nhs_number')
+    if not nhs_number:
+        return jsonify({"success": False, "error": "Missing NHS number"}), 400
+    
+    if nhs_number not in mock_data["persons"]:
+        mock_data["persons"][nhs_number] = {
+            "nhs_number": nhs_number,
+            "name": data.get('name', 'New Patient'),
+            "date_of_birth": data.get('date_of_birth', '2000-01-01'),
+            "gender": data.get('gender', 'Unknown')
+        }
+        mock_data["goals"][nhs_number] = []
+        mock_data["outcomes"][nhs_number] = []
+        mock_data["pam_scores"][nhs_number] = []
+        mock_data["notes"][nhs_number] = []
+    
+    return jsonify({"success": True, "nhs_number": nhs_number})
 
-# --- Care Plan ---
-@app.route('/api/plan/<person_id>', methods=['GET'])
-def get_care_plan(person_id):
-    try:
-        # Check if person exists
-        person = db.execute_query(
-            "SELECT * FROM persons WHERE nhs_number = ?", (person_id,)
-        )
-        if not person:
-            # Create mock person if not exists
-            return jsonify({
-                "success": True,
-                "data": {
-                    "plan": {
-                        "plan_id": "plan-" + str(uuid.uuid4()),
-                        "person_id": person_id,
-                        "status": "active"
-                    }
-                }
-            })
-        
-        # Get or create care plan
-        plan = db.execute_query(
-            "SELECT * FROM care_plans WHERE person_id = ? AND status = 'active'",
-            (person_id,)
-        )
-        
-        if not plan:
-            plan_id = str(uuid.uuid4())
-            db.execute_update(
-                "INSERT INTO care_plans (plan_id, person_id) VALUES (?, ?)",
-                (plan_id, person_id)
-            )
-            plan = db.execute_query(
-                "SELECT * FROM care_plans WHERE plan_id = ?", (plan_id,)
-            )
-        
-        return jsonify({
-            "success": True,
-            "data": {
-                "plan": plan[0] if plan else None
-            }
-        })
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+# ==================== PLAN ====================
+@app.route('/api/plan/<person_id>')
+def get_plan(person_id):
+    if person_id not in mock_data["plans"]:
+        mock_data["plans"][person_id] = {
+            "plan_id": "plan-" + str(uuid.uuid4()),
+            "person_id": person_id,
+            "status": "active"
+        }
+    return jsonify({
+        "success": True,
+        "data": {"plan": mock_data["plans"][person_id]}
+    })
 
-# --- Goals ---
-@app.route('/api/goals/<person_id>', methods=['GET'])
+# ==================== GOALS ====================
+@app.route('/api/goals/<person_id>')
 def get_goals(person_id):
-    try:
-        goals = db.execute_query(
-            "SELECT * FROM goals WHERE person_id = ? ORDER BY created_date DESC",
-            (person_id,)
-        )
-        return jsonify({"success": True, "data": goals})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+    goals = mock_data["goals"].get(person_id, [])
+    return jsonify({"success": True, "data": goals})
 
 @app.route('/api/goal', methods=['POST'])
 def create_goal():
-    try:
-        data = request.json
-        print(f"📥 Creating goal: {data}")
-        
-        required = ['person_id', 'plan_id', 'description', 'domain']
-        for field in required:
-            if field not in data:
-                return jsonify({"success": False, "error": f"Missing required field: {field}"}), 400
-        
-        goal_id = str(uuid.uuid4())
-        query = '''
-            INSERT INTO goals 
-            (goal_id, person_id, plan_id, description, domain, status, 
-             target_date, steps, barriers, enablers, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        '''
-        db.execute_update(query, (
-            goal_id,
-            data['person_id'],
-            data['plan_id'],
-            data['description'],
-            data['domain'],
-            data.get('status', 'planned'),
-            data.get('target_date'),
-            json.dumps(data.get('steps', [])),
-            json.dumps(data.get('barriers', [])),
-            json.dumps(data.get('enablers', [])),
-            data.get('notes', '')
-        ))
-        
-        print(f"✅ Goal created: {goal_id}")
-        return jsonify({"success": True, "goal_id": goal_id})
-    except Exception as e:
-        print(f"❌ Error creating goal: {e}")
-        return jsonify({"success": False, "error": str(e)}), 500
+    data = request.json
+    person_id = data.get('person_id')
+    if not person_id:
+        return jsonify({"success": False, "error": "Missing person_id"}), 400
+    
+    goal = {
+        "goal_id": str(uuid.uuid4())[:8],
+        "description": data.get('description', ''),
+        "domain": data.get('domain', 'physical_health'),
+        "status": data.get('status', 'planned'),
+        "steps": data.get('steps', []),
+        "target_date": data.get('target_date'),
+        "created_date": datetime.now().isoformat()
+    }
+    
+    if person_id not in mock_data["goals"]:
+        mock_data["goals"][person_id] = []
+    mock_data["goals"][person_id].append(goal)
+    
+    return jsonify({"success": True, "goal_id": goal["goal_id"]})
 
 @app.route('/api/goal/<goal_id>', methods=['PUT'])
 def update_goal(goal_id):
-    try:
-        data = request.json
-        query = '''
-            UPDATE goals 
-            SET description=?, status=?, target_date=?, steps=?, 
-                barriers=?, enablers=?, notes=?, updated_date=CURRENT_TIMESTAMP
-            WHERE goal_id=?
-        '''
-        db.execute_update(query, (
-            data.get('description'),
-            data.get('status'),
-            data.get('target_date'),
-            json.dumps(data.get('steps', [])),
-            json.dumps(data.get('barriers', [])),
-            json.dumps(data.get('enablers', [])),
-            data.get('notes'),
-            goal_id
-        ))
-        
-        if data.get('status') == 'achieved':
-            db.execute_update(
-                "UPDATE goals SET completion_date = CURRENT_TIMESTAMP WHERE goal_id = ?",
-                (goal_id,)
-            )
-        
-        return jsonify({"success": True})
-    except Exception as e):
-        return jsonify({"success": False, "error": str(e)}), 500
+    data = request.json
+    for person_id, goals in mock_data["goals"].items():
+        for goal in goals:
+            if goal.get("goal_id") == goal_id:
+                goal["status"] = data.get("status", goal["status"])
+                goal["description"] = data.get("description", goal["description"])
+                return jsonify({"success": True})
+    return jsonify({"success": False, "error": "Goal not found"}), 404
 
-@app.route('/api/goal/<goal_id>', methods=['DELETE'])
-def delete_goal(goal_id):
-    try:
-        db.execute_update("DELETE FROM goals WHERE goal_id = ?", (goal_id,))
-        return jsonify({"success": True})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
-
-# --- Outcomes ---
-@app.route('/api/outcomes/<person_id>', methods=['GET'])
+# ==================== OUTCOMES ====================
+@app.route('/api/outcomes/<person_id>')
 def get_outcomes(person_id):
-    try:
-        outcomes = db.execute_query(
-            "SELECT * FROM outcomes WHERE person_id = ? ORDER BY date_recorded DESC",
-            (person_id,)
-        )
-        return jsonify({"success": True, "data": outcomes})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+    outcomes = mock_data["outcomes"].get(person_id, [])
+    return jsonify({"success": True, "data": outcomes})
 
 @app.route('/api/outcome', methods=['POST'])
 def create_outcome():
-    try:
-        data = request.json
-        required = ['person_id', 'plan_id', 'domain', 'metric_name', 'value']
-        for field in required:
-            if field not in data:
-                return jsonify({"success": False, "error": f"Missing required field: {field}"}), 400
-        
-        outcome_id = str(uuid.uuid4())
-        query = '''
-            INSERT INTO outcomes 
-            (outcome_id, person_id, plan_id, domain, metric_name, value, target_value, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        '''
-        db.execute_update(query, (
-            outcome_id,
-            data['person_id'],
-            data['plan_id'],
-            data['domain'],
-            data['metric_name'],
-            float(data['value']),
-            data.get('target_value'),
-            data.get('notes', '')
-        ))
-        
-        return jsonify({"success": True, "outcome_id": outcome_id})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+    data = request.json
+    person_id = data.get('person_id')
+    if not person_id:
+        return jsonify({"success": False, "error": "Missing person_id"}), 400
+    
+    outcome = {
+        "outcome_id": str(uuid.uuid4())[:8],
+        "metric_name": data.get('metric_name', ''),
+        "value": data.get('value', 0),
+        "target_value": data.get('target_value'),
+        "domain": data.get('domain', 'physical_health'),
+        "date_recorded": datetime.now().isoformat()
+    }
+    
+    if person_id not in mock_data["outcomes"]:
+        mock_data["outcomes"][person_id] = []
+    mock_data["outcomes"][person_id].append(outcome)
+    
+    return jsonify({"success": True, "outcome_id": outcome["outcome_id"]})
 
-# --- PAM Scores ---
-@app.route('/api/pam/<person_id>', methods=['GET'])
+# ==================== PAM ====================
+@app.route('/api/pam/<person_id>')
 def get_pam(person_id):
-    try:
-        scores = db.execute_query(
-            "SELECT * FROM pam_scores WHERE person_id = ? ORDER BY date_taken ASC",
-            (person_id,)
-        )
-        # If no scores, return mock data
-        if not scores:
-            return jsonify({
-                "success": True,
-                "data": [
-                    {"score": 45, "level": 1, "date_taken": "2024-01-01", "notes": "Initial assessment"},
-                    {"score": 52, "level": 2, "date_taken": "2024-02-01", "notes": "Follow-up"},
-                    {"score": 58, "level": 3, "date_taken": "2024-03-01", "notes": "Progress"}
-                ]
-            })
-        return jsonify({"success": True, "data": scores})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+    scores = mock_data["pam_scores"].get(person_id, [])
+    return jsonify({"success": True, "data": scores})
 
 @app.route('/api/pam', methods=['POST'])
 def create_pam():
-    try:
-        data = request.json
-        if 'person_id' not in data or 'score' not in data:
-            return jsonify({"success": False, "error": "Missing required fields"}), 400
-        
-        pam_id = str(uuid.uuid4())
-        score = int(data['score'])
-        level = 1 if score <= 47 else 2 if score <= 54.9 else 3 if score <= 66.9 else 4
-        
-        query = "INSERT INTO pam_scores (pam_id, person_id, score, level, notes) VALUES (?, ?, ?, ?, ?)"
-        db.execute_update(query, (pam_id, data['person_id'], score, level, data.get('notes', '')))
-        
-        return jsonify({"success": True, "pam_id": pam_id, "level": level})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+    data = request.json
+    person_id = data.get('person_id')
+    score = data.get('score')
+    if not person_id or score is None:
+        return jsonify({"success": False, "error": "Missing person_id or score"}), 400
+    
+    level = 1 if score <= 47 else 2 if score <= 54.9 else 3 if score <= 66.9 else 4
+    
+    pam_entry = {
+        "pam_id": str(uuid.uuid4())[:8],
+        "score": score,
+        "level": level,
+        "date_taken": datetime.now().isoformat()
+    }
+    
+    if person_id not in mock_data["pam_scores"]:
+        mock_data["pam_scores"][person_id] = []
+    mock_data["pam_scores"][person_id].append(pam_entry)
+    
+    return jsonify({"success": True, "pam_id": pam_entry["pam_id"], "level": level})
 
-# --- Clinical Notes ---
-@app.route('/api/notes/<person_id>', methods=['GET'])
+# ==================== NOTES ====================
+@app.route('/api/notes/<person_id>')
 def get_notes(person_id):
-    try:
-        notes = db.execute_query(
-            "SELECT * FROM clinical_notes WHERE person_id = ? ORDER BY date_created DESC",
-            (person_id,)
-        )
-        return jsonify({"success": True, "data": notes})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+    notes = mock_data["notes"].get(person_id, [])
+    return jsonify({"success": True, "data": notes})
 
 @app.route('/api/note', methods=['POST'])
 def create_note():
-    try:
-        data = request.json
-        if 'person_id' not in data or 'note_text' not in data:
-            return jsonify({"success": False, "error": "Missing required fields"}), 400
-        
-        note_id = str(uuid.uuid4())
-        query = '''
-            INSERT INTO clinical_notes 
-            (note_id, person_id, author, note_text, sentiment_score, entities, summary)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        '''
-        db.execute_update(query, (
-            note_id,
-            data['person_id'],
-            data.get('author', ''),
-            data['note_text'],
-            data.get('sentiment_score', 0),
-            json.dumps(data.get('entities', {})),
-            data.get('summary', '')
-        ))
-        
-        return jsonify({"success": True, "note_id": note_id})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+    data = request.json
+    person_id = data.get('person_id')
+    if not person_id:
+        return jsonify({"success": False, "error": "Missing person_id"}), 400
+    
+    note = {
+        "note_id": str(uuid.uuid4())[:8],
+        "note_text": data.get('note_text', ''),
+        "author": data.get('author', 'Unknown'),
+        "sentiment_score": data.get('sentiment_score', 0),
+        "date_created": datetime.now().isoformat()
+    }
+    
+    if person_id not in mock_data["notes"]:
+        mock_data["notes"][person_id] = []
+    mock_data["notes"][person_id].append(note)
+    
+    return jsonify({"success": True, "note_id": note["note_id"]})
 
-# --- AI Insights ---
-@app.route('/api/insights/<person_id>', methods=['GET'])
+# ==================== INSIGHTS ====================
+@app.route('/api/insights/<person_id>')
 def get_insights(person_id):
-    try:
-        # Get PAM scores for trend
-        pam_scores = db.execute_query(
-            "SELECT score FROM pam_scores WHERE person_id = ? ORDER BY date_taken ASC",
-            (person_id,)
-        )
-        scores = [p['score'] for p in pam_scores]
-        latest_pam = scores[-1] if scores else 50
-        
-        # Get goals for completion rate
-        goals = db.execute_query(
-            "SELECT * FROM goals WHERE person_id = ?", (person_id,)
-        )
-        completed = sum(1 for g in goals if g['status'] == 'achieved')
-        completion_rate = completed / len(goals) if goals else 0
-        
-        # Calculate age (if we have person data)
-        person = db.execute_query(
-            "SELECT date_of_birth FROM persons WHERE nhs_number = ?", (person_id,)
-        )
-        age = 60  # default
-        if person and person[0].get('date_of_birth'):
-            try:
-                dob = datetime.fromisoformat(person[0]['date_of_birth'])
-                age = (datetime.now() - dob).days // 365
-            except:
-                pass
-        
-        # Build risk assessment
-        risk_level = 'low'
-        risk_score = 0.25
-        risk_factors = []
-        
-        if completion_rate < 0.3:
-            risk_factors.append('Low goal completion rate')
-            risk_score += 0.2
-        if latest_pam < 48:
-            risk_factors.append('Low patient activation')
-            risk_score += 0.3
-        if age > 75:
-            risk_factors.append('Advanced age')
-            risk_score += 0.15
-        
-        if risk_score > 0.7:
-            risk_level = 'critical'
-        elif risk_score > 0.5:
-            risk_level = 'high'
-        elif risk_score > 0.3:
-            risk_level = 'medium'
-        
-        # Generate recommendations
-        recommendations = []
-        if completion_rate < 0.5:
-            recommendations.append({
-                'name': 'Review Goals',
-                'priority': 1,
-                'justification': 'Low goal completion rate'
-            })
-        if latest_pam < 48:
-            recommendations.append({
-                'name': 'Self-Management Support',
-                'priority': 1,
-                'justification': 'Low patient activation'
-            })
-        if risk_level in ['high', 'critical']:
-            recommendations.append({
-                'name': 'Clinical Review',
-                'priority': 1,
-                'justification': 'High risk detected'
-            })
-        
-        # Domain scores (from outcomes)
-        outcomes = db.execute_query(
-            "SELECT * FROM outcomes WHERE person_id = ?", (person_id,)
-        )
-        domain_scores = {}
-        for outcome in outcomes:
-            domain = outcome['domain']
-            if domain not in domain_scores:
-                domain_scores[domain] = []
-            if outcome['target_value'] and outcome['target_value'] > 0:
-                score = min((outcome['value'] / outcome['target_value']) * 10, 10)
-                domain_scores[domain].append(score)
-        
-        for domain in domain_scores:
-            domain_scores[domain] = sum(domain_scores[domain]) / len(domain_scores[domain])
-        
-        # PAM prediction
-        if len(scores) > 1:
-            last_avg = sum(scores[-3:]) / min(3, len(scores))
-            pam_trend = 'improving' if scores[-1] > scores[-2] else 'declining' if scores[-1] < scores[-2] else 'stable'
-            pam_prediction = min(max(int(last_avg + (scores[-1] - scores[-2]) * 1.5), 0), 100)
-        else:
-            pam_trend = 'stable'
-            pam_prediction = latest_pam
-        
-        return jsonify({
-            "success": True,
-            "data": {
-                "person_id": person_id,
-                "generated_at": datetime.now().isoformat(),
-                "risk_assessment": {
-                    "risk_level": risk_level,
-                    "risk_score": risk_score,
-                    "confidence": 0.85,
-                    "factors": risk_factors if risk_factors else ['No significant risk factors identified']
-                },
-                "pam_trajectory": {
-                    "predicted_score": pam_prediction,
-                    "trend": pam_trend,
-                    "confidence": 0.7 if len(scores) > 3 else 0.5,
-                    "trajectory": [min(max(latest_pam + i * 2, 0), 100) for i in range(10)]
-                },
-                "recommendations": recommendations[:5],
-                "domain_scores": domain_scores,
-                "sentiment_analysis": {
-                    "overall": 0.1,
-                    "classification": "neutral"
-                },
-                "entities": {},
-                "summary": {
-                    "total_goals": len(goals),
-                    "completed_goals": completed,
-                    "completion_rate": completion_rate,
-                    "latest_pam": latest_pam
-                }
+    scores = mock_data["pam_scores"].get(person_id, [])
+    latest_pam = scores[-1]["score"] if scores else 50
+    
+    goals = mock_data["goals"].get(person_id, [])
+    completed = len([g for g in goals if g["status"] == "achieved"])
+    completion_rate = completed / len(goals) if goals else 0
+    
+    return jsonify({
+        "success": True,
+        "data": {
+            "risk_assessment": {
+                "risk_level": "low",
+                "risk_score": 0.25,
+                "confidence": 0.85,
+                "factors": ["No significant risk factors identified"]
+            },
+            "pam_trajectory": {
+                "predicted_score": min(latest_pam + 5, 100),
+                "trend": "improving" if len(scores) > 1 and scores[-1]["score"] > scores[-2]["score"] else "stable",
+                "confidence": 0.7
+            },
+            "recommendations": [
+                {"name": "Review Goals", "priority": 1, "justification": "Low goal completion rate"} if completion_rate < 0.5 else None,
+                {"name": "Self-Management Support", "priority": 2, "justification": "Consider activation level"} if latest_pam < 55 else None
+            ],
+            "domain_scores": {"physical_health": 6.5, "mental_health": 7.0},
+            "summary": {
+                "total_goals": len(goals),
+                "completed_goals": completed,
+                "completion_rate": completion_rate,
+                "latest_pam": latest_pam
             }
-        })
-    except Exception as e:
-        print(f"❌ Error generating insights: {e}")
-        return jsonify({
-            "success": True,
-            "data": {
-                "risk_assessment": {"risk_level": "low", "risk_score": 0.25},
-                "recommendations": [],
-                "summary": {"total_goals": 0, "completed_goals": 0, "completion_rate": 0, "latest_pam": 50}
-            }
-        })
+        }
+    })
 
-# --- Population ---
-@app.route('/api/population', methods=['GET'])
+# ==================== POPULATION ====================
+@app.route('/api/population')
 def get_population():
-    try:
-        patients = db.execute_query("SELECT COUNT(*) as count FROM persons WHERE is_active = 1")
-        pam_avg = db.execute_query("SELECT AVG(score) as avg FROM pam_scores")
-        goals = db.execute_query("SELECT status, COUNT(*) as count FROM goals GROUP BY status")
-        
-        return jsonify({
-            "success": True,
-            "data": {
-                "total_patients": patients[0]['count'] if patients else 0,
-                "average_pam": pam_avg[0]['avg'] if pam_avg and pam_avg[0]['avg'] else 0,
-                "goal_distribution": goals,
-                "risk_distribution": {"low": 2, "medium": 1, "high": 0, "critical": 0}
-            }
-        })
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+    total_patients = len(mock_data["persons"])
+    all_scores = []
+    for scores in mock_data["pam_scores"].values():
+        if scores:
+            all_scores.append(scores[-1]["score"])
+    
+    avg_pam = sum(all_scores) / len(all_scores) if all_scores else 0
+    
+    return jsonify({
+        "success": True,
+        "data": {
+            "total_patients": total_patients,
+            "average_pam": avg_pam,
+            "goal_distribution": [{"status": "planned", "count": 2}, {"status": "in_progress", "count": 1}],
+            "risk_distribution": {"low": 2, "medium": 0, "high": 0, "critical": 0}
+        }
+    })
 
-# --- Decisions ---
-@app.route('/api/decisions/<person_id>', methods=['GET'])
-def get_decisions(person_id):
-    try:
-        decisions = db.execute_query(
-            "SELECT * FROM decisions WHERE person_id = ? ORDER BY decision_date DESC",
-            (person_id,)
-        )
-        return jsonify({"success": True, "data": decisions})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
-
-@app.route('/api/decision', methods=['POST'])
-def create_decision():
-    try:
-        data = request.json
-        required = ['person_id', 'topic', 'chosen_option']
-        for field in required:
-            if field not in data:
-                return jsonify({"success": False, "error": f"Missing required field: {field}"}), 400
-        
-        decision_id = str(uuid.uuid4())
-        query = '''
-            INSERT INTO decisions 
-            (decision_id, person_id, topic, options, chosen_option, preference_mode, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        '''
-        db.execute_update(query, (
-            decision_id,
-            data['person_id'],
-            data['topic'],
-            json.dumps(data.get('options', [])),
-            data['chosen_option'],
-            data.get('preference_mode', 'shared'),
-            data.get('notes', '')
-        ))
-        
-        return jsonify({"success": True, "decision_id": decision_id})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
-
-# --- Error Handlers ---
+# ==================== ERROR HANDLING ====================
 @app.errorhandler(404)
 def not_found(e):
-    return jsonify({"error": "Resource not found", "status": 404}), 404
+    return jsonify({"error": "Not found", "status": 404}), 404
 
 @app.errorhandler(500)
 def server_error(e):
@@ -752,4 +380,4 @@ def server_error(e):
 
 # ==================== MAIN ====================
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000)
