@@ -1,11 +1,15 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "app.py"
+    }
+  ],
   "functions": {
     "app.py": {
-      "maxDuration": 30,
-      "excludeFiles": "{tests/**,__tests__/**,**/*.test.py,**/test_*.py,fixtures/**,__fixtures__/**,testdata/**,sample-data/**,static/**,assets/**}"
+      "maxDuration": 10,
+      "memory": 1024
     }
-  },
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/app.py" }
-  ]
+  }
 }

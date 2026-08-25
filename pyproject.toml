@@ -1,6 +1,7 @@
 [project]
 name = "nhs-personalised-care"
 version = "1.0.0"
+description = "NHS Personalised Care System"
 requires-python = ">=3.12"
 dependencies = [
     "Flask==2.3.3",
