@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#005EB8">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="NHS Care">
+    <meta name="apple-mobile-web-app-title" content="NHS Care">
     <title>NHS Personalised Care</title>
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/icons/icon-192.png">
     
     <style>
-        /* ============================================================
-           CSS VARIABLES & RESET
-           ============================================================ */
         * {
             margin: 0;
             padding: 0;
@@ -33,40 +33,48 @@
             --text: #212121;
             --text-light: #6B6B6B;
             --background: #F5F7FA;
-            --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-            --radius: 16px;
+            --shadow: 0 2px 12px rgba(0,0,0,0.08);
+            --radius: 14px;
             --sidebar-width: 240px;
-            --header-height: 64px;
-            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --safe-area-inset: env(safe-area-inset-bottom, 0px);
+            --header-height: 60px;
+            --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+            --safe-area-inset: env(safe-area-inset-bottom,0px);
+            --font-size-base: 16px;
+        }
+
+        html {
+            font-size: var(--font-size-base);
+            -webkit-text-size-adjust: 100%;
+            touch-action: manipulation;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: var(--background);
             color: var(--text);
             display: flex;
             min-height: 100vh;
+            min-height: 100dvh;
             overflow-x: hidden;
-            padding-bottom: env(safe-area-inset-bottom);
+            padding-bottom: calc(var(--safe-area-inset) + 0px);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* ============================================================
-           SCROLLBAR
-           ============================================================ */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        input, select, textarea, button {
+            font-size: var(--font-size-base);
+        }
+
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--gray); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: var(--gray); border-radius: 2px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--gray-dark); }
 
-        /* ============================================================
-           SIDEBAR
-           ============================================================ */
         .sidebar {
             width: var(--sidebar-width);
             background: white;
             border-right: 1px solid #E8ECF0;
-            padding: 20px 12px;
+            padding: 16px 12px;
             position: fixed;
             top: 0;
             left: 0;
@@ -74,34 +82,36 @@
             overflow-y: auto;
             z-index: 100;
             transition: transform var(--transition);
+            will-change: transform;
+            overscroll-behavior: contain;
         }
 
         .sidebar .logo {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 32px;
+            gap: 10px;
+            margin-bottom: 24px;
             padding: 0 8px;
         }
 
         .sidebar .logo .badge {
             background: var(--primary);
             color: white;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 9px;
             font-weight: 700;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
         }
 
         .sidebar .logo h1 {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
             color: var(--primary);
         }
 
         .sidebar .logo small {
-            font-size: 10px;
+            font-size: 9px;
             color: var(--text-light);
             display: block;
             font-weight: 400;
@@ -110,63 +120,75 @@
         .nav-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 11px 14px;
+            gap: 10px;
+            padding: 10px 12px;
             border-radius: 10px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.15s;
             text-decoration: none;
             color: var(--text);
             margin-bottom: 2px;
             border: none;
             background: none;
             width: 100%;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             position: relative;
+            -webkit-touch-callout: none;
         }
 
-        .nav-item:hover { background: var(--primary-light); }
-        .nav-item.active { background: var(--primary); color: white; }
-        .nav-item .icon { font-size: 20px; width: 28px; text-align: center; flex-shrink: 0; }
+        .nav-item:active { 
+            background: var(--primary-light);
+            transform: scale(0.97);
+        }
+
+        .nav-item.active { 
+            background: var(--primary); 
+            color: white; 
+        }
+
+        .nav-item .icon { 
+            font-size: 18px; 
+            width: 24px; 
+            text-align: center; 
+            flex-shrink: 0; 
+        }
+
         .nav-item .badge {
             margin-left: auto;
             background: var(--danger);
             color: white;
-            padding: 1px 8px;
+            padding: 1px 6px;
             border-radius: 10px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
         }
-        .nav-item.active .badge { background: rgba(255, 255, 255, 0.3); }
 
-        /* ============================================================
-           MAIN CONTENT
-           ============================================================ */
+        .nav-item.active .badge { background: rgba(255,255,255,0.3); }
+
         .main-content {
             margin-left: var(--sidebar-width);
             flex: 1;
-            padding: 20px 28px 40px;
+            padding: 16px 20px 30px;
             min-height: 100vh;
+            min-height: 100dvh;
             max-width: calc(100% - var(--sidebar-width));
+            overflow-x: hidden;
         }
 
-        /* ============================================================
-           HEADER
-           ============================================================ */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 28px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 10px;
         }
 
         .header-left {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .mobile-toggle {
@@ -174,39 +196,43 @@
             background: var(--primary);
             color: white;
             border: none;
-            padding: 8px 12px;
+            padding: 8px 10px;
             border-radius: 8px;
-            font-size: 20px;
+            font-size: 18px;
             cursor: pointer;
+            touch-action: manipulation;
         }
 
+        .mobile-toggle:active { transform: scale(0.95); }
+
         .header h1 {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 700;
             line-height: 1.2;
         }
 
         .header .subtitle {
             color: var(--text-light);
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 400;
         }
 
         .header-actions {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             align-items: center;
             flex-wrap: wrap;
         }
 
         .header-actions input {
-            padding: 8px 14px;
+            padding: 7px 12px;
             border: 2px solid #E8ECF0;
-            border-radius: 10px;
-            font-size: 14px;
-            min-width: 180px;
+            border-radius: 8px;
+            font-size: 13px;
+            min-width: 140px;
             transition: border-color 0.2s;
             background: white;
+            height: 38px;
         }
 
         .header-actions input:focus {
@@ -214,106 +240,99 @@
             border-color: var(--primary);
         }
 
-        /* ============================================================
-           BUTTONS
-           ============================================================ */
         .btn {
-            padding: 9px 18px;
+            padding: 8px 14px;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.15s;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            font-size: 14px;
+            gap: 5px;
+            font-size: 13px;
             white-space: nowrap;
+            touch-action: manipulation;
+            min-height: 38px;
+            min-width: 44px;
         }
 
-        .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .btn:active { transform: scale(0.97); }
+        .btn:active { 
+            transform: scale(0.96); 
+            opacity: 0.85;
+        }
+
         .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-primary:active { background: var(--primary-dark); }
         .btn-success { background: var(--success); color: white; }
         .btn-danger { background: var(--danger); color: white; }
         .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
-        .btn-outline:hover { background: var(--primary); color: white; }
-        .btn-sm { padding: 5px 12px; font-size: 12px; }
+        .btn-outline:active { background: var(--primary); color: white; }
+        .btn-sm { padding: 4px 10px; font-size: 11px; min-height: 30px; }
 
-        /* ============================================================
-           VIEWS
-           ============================================================ */
-        .view { display: none; animation: fadeIn 0.35s ease; }
+        .view { display: none; animation: fadeIn 0.25s ease; }
         .view.active { display: block; }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(12px); }
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ============================================================
-           CARDS
-           ============================================================ */
         .card {
             background: white;
             border-radius: var(--radius);
-            padding: 20px;
+            padding: 16px;
             box-shadow: var(--shadow);
-            margin-bottom: 20px;
-            transition: transform 0.2s;
+            margin-bottom: 16px;
+            transition: transform 0.15s;
         }
+
+        .card:active { transform: scale(0.99); }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
         }
 
-        .card-header h3 { font-size: 17px; font-weight: 600; }
+        .card-header h3 { font-size: 16px; font-weight: 600; }
 
-        /* ============================================================
-           STATS GRID
-           ============================================================ */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 14px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
         }
 
         .stat-card {
             background: white;
-            padding: 18px;
+            padding: 14px;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            transition: transform 0.2s;
+            transition: transform 0.15s;
         }
 
-        .stat-card:hover { transform: translateY(-2px); }
-        .stat-card .label { font-size: 13px; color: var(--text-light); margin-bottom: 2px; }
-        .stat-card .value { font-size: 28px; font-weight: 700; }
-        .stat-card .change { font-size: 12px; margin-top: 4px; }
+        .stat-card:active { transform: scale(0.97); }
+        .stat-card .label { font-size: 12px; color: var(--text-light); margin-bottom: 2px; }
+        .stat-card .value { font-size: 24px; font-weight: 700; }
+        .stat-card .change { font-size: 11px; margin-top: 3px; }
         .stat-card .change.up { color: var(--success); }
         .stat-card .change.down { color: var(--danger); }
 
-        /* ============================================================
-           PAM CARD
-           ============================================================ */
         .pam-card {
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
-            padding: 24px 28px;
+            padding: 20px 24px;
             border-radius: var(--radius);
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             box-shadow: var(--shadow);
         }
 
         .pam-card .score {
-            font-size: 56px;
+            font-size: 44px;
             font-weight: 700;
             line-height: 1;
         }
@@ -321,44 +340,42 @@
         .pam-card .level {
             display: inline-block;
             background: rgba(255,255,255,0.2);
-            padding: 4px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            margin-top: 6px;
+            padding: 3px 14px;
+            border-radius: 16px;
+            font-size: 12px;
+            margin-top: 4px;
         }
 
         .pam-card .trend {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            margin-left: 10px;
-            font-size: 13px;
+            gap: 3px;
+            margin-left: 8px;
+            font-size: 12px;
         }
 
         .pam-card .trend.up { color: #7FFF7F; }
         .pam-card .trend.down { color: #FF7F7F; }
 
-        /* ============================================================
-           GOAL ITEMS
-           ============================================================ */
         .goal-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
+            padding: 10px 0;
             border-bottom: 1px solid #F0F0F0;
-            gap: 12px;
+            gap: 10px;
+            touch-action: manipulation;
         }
 
         .goal-item:last-child { border-bottom: none; }
         .goal-item .info { flex: 1; min-width: 0; }
-        .goal-item .description { font-weight: 500; font-size: 14px; }
-        .goal-item .domain { font-size: 12px; color: var(--text-light); }
+        .goal-item .description { font-weight: 500; font-size: 13px; }
+        .goal-item .domain { font-size: 11px; color: var(--text-light); }
 
         .goal-item .status {
-            padding: 3px 12px;
-            border-radius: 12px;
-            font-size: 11px;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 10px;
             font-weight: 600;
             white-space: nowrap;
         }
@@ -370,78 +387,69 @@
         .goal-item .status.abandoned { background: #F5F5F5; color: #757575; }
 
         .goal-item .progress {
-            width: 70px;
-            height: 4px;
+            width: 60px;
+            height: 3px;
             background: var(--gray);
             border-radius: 2px;
             overflow: hidden;
-            margin-top: 4px;
+            margin-top: 3px;
         }
 
         .goal-item .progress .fill {
             height: 100%;
             background: var(--primary);
             border-radius: 2px;
-            transition: width 0.8s ease;
+            transition: width 0.6s ease;
         }
 
-        /* ============================================================
-           TABLE
-           ============================================================ */
-        .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
 
         th {
             text-align: left;
-            padding: 10px 8px;
-            font-size: 12px;
+            padding: 8px 6px;
+            font-size: 11px;
             font-weight: 600;
             color: var(--text-light);
             border-bottom: 2px solid #F0F0F0;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.2px;
         }
 
-        td { padding: 10px 8px; border-bottom: 1px solid #F5F5F5; }
-        tr:hover td { background: #FAFAFA; }
+        td { padding: 8px 6px; border-bottom: 1px solid #F5F5F5; }
+        tr:active td { background: var(--primary-light); }
 
-        /* ============================================================
-           INSIGHTS
-           ============================================================ */
         .insight-item {
-            padding: 14px 16px;
-            border-left: 4px solid var(--primary);
+            padding: 12px 14px;
+            border-left: 3px solid var(--primary);
             background: var(--primary-light);
             border-radius: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
-        .insight-item .title { font-weight: 600; font-size: 14px; }
-        .insight-item .desc { font-size: 13px; color: var(--text-light); margin-top: 2px; }
+        .insight-item .title { font-weight: 600; font-size: 13px; }
+        .insight-item .desc { font-size: 12px; color: var(--text-light); margin-top: 2px; }
 
         .insight-item .priority {
             display: inline-block;
-            padding: 2px 10px;
-            border-radius: 10px;
-            font-size: 11px;
+            padding: 1px 8px;
+            border-radius: 8px;
+            font-size: 10px;
             font-weight: 600;
-            margin-top: 4px;
+            margin-top: 3px;
         }
 
         .insight-item .priority.high { background: var(--danger); color: white; }
         .insight-item .priority.medium { background: var(--warning); color: #333; }
         .insight-item .priority.low { background: var(--gray); color: #333; }
 
-        /* ============================================================
-           RISK INDICATOR
-           ============================================================ */
         .risk-indicator {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-radius: 10px;
-            margin: 8px 0;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin: 6px 0;
         }
 
         .risk-indicator.low { background: #E8F5E9; color: #2E7D32; }
@@ -454,22 +462,16 @@
             50% { opacity: 0.7; }
         }
 
-        /* ============================================================
-           EMPTY STATE
-           ============================================================ */
         .empty-state {
             text-align: center;
-            padding: 40px 20px;
+            padding: 30px 16px;
             color: var(--text-light);
         }
 
-        .empty-state .icon { font-size: 48px; margin-bottom: 10px; }
-        .empty-state h4 { color: var(--text); margin-bottom: 4px; }
-        .empty-state p { font-size: 14px; }
+        .empty-state .icon { font-size: 36px; margin-bottom: 8px; }
+        .empty-state h4 { color: var(--text); margin-bottom: 3px; font-size: 15px; }
+        .empty-state p { font-size: 13px; }
 
-        /* ============================================================
-           MODAL
-           ============================================================ */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -479,53 +481,60 @@
             bottom: 0;
             background: rgba(0,0,0,0.5);
             z-index: 200;
-            align-items: center;
+            align-items: flex-end;
             justify-content: center;
-            padding: 20px;
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(2px);
         }
 
         .modal-overlay.active { display: flex; }
 
         .modal {
             background: white;
-            border-radius: 24px;
-            padding: 28px 32px;
-            max-width: 520px;
+            border-radius: 20px 20px 0 0;
+            padding: 20px 24px;
+            max-width: 500px;
             width: 100%;
             max-height: 85vh;
             overflow-y: auto;
             animation: slideUp 0.3s ease;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+            padding-bottom: calc(20px + var(--safe-area-inset));
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal .handle {
+            width: 40px;
+            height: 4px;
+            background: var(--gray);
+            border-radius: 2px;
+            margin: 0 auto 16px;
         }
 
         .modal .close {
             float: right;
             background: none;
             border: none;
-            font-size: 24px;
+            font-size: 20px;
             cursor: pointer;
             color: var(--text-light);
             padding: 4px 8px;
-            border-radius: 6px;
-            transition: background 0.2s;
+            border-radius: 4px;
         }
 
-        .modal .close:hover { background: #F5F5F5; }
-        .modal h2 { margin-bottom: 20px; font-size: 22px; font-weight: 700; }
+        .modal .close:active { background: #F5F5F5; }
+        .modal h2 { margin-bottom: 16px; font-size: 20px; font-weight: 700; }
 
-        .modal .form-group { margin-bottom: 14px; }
+        .modal .form-group { margin-bottom: 12px; }
         .modal .form-group label {
             display: block;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             color: var(--text-light);
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
         .modal .form-group input,
@@ -539,6 +548,8 @@
             font-family: inherit;
             transition: border-color 0.2s;
             background: white;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         .modal .form-group input:focus,
@@ -553,33 +564,41 @@
         .modal .btn + .btn { margin-top: 8px; }
 
         /* ============================================================
-           TOAST NOTIFICATIONS
+           TOAST NOTIFICATIONS - FIXED: Single icon, right side
            ============================================================ */
         .toast-container {
             position: fixed;
-            top: 20px;
+            top: 70px;
             right: 20px;
             z-index: 300;
-            max-width: 400px;
+            max-width: 380px;
             width: 100%;
             pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
         }
 
         .toast {
             background: #323232;
             color: white;
-            padding: 14px 18px;
+            padding: 14px 20px;
             border-radius: 12px;
-            margin-bottom: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            animation: slideIn 0.4s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            animation: slideInRight 0.4s ease;
             display: flex;
             align-items: center;
             gap: 12px;
             pointer-events: auto;
+            font-size: 14px;
+            opacity: 1;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            min-width: 200px;
+            max-width: 380px;
         }
 
-        @keyframes slideIn {
+        @keyframes slideInRight {
             from { opacity: 0; transform: translateX(100%); }
             to { opacity: 1; transform: translateX(0); }
         }
@@ -587,6 +606,33 @@
         .toast.success { background: var(--success); }
         .toast.error { background: var(--danger); }
         .toast.info { background: var(--primary); }
+
+        .toast.hiding {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+
+        .toast .toast-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .toast .toast-content {
+            flex: 1;
+        }
+
+        .toast .toast-title {
+            font-weight: 600;
+            font-size: 14px;
+            display: block;
+        }
+
+        .toast .toast-message {
+            font-size: 12px;
+            opacity: 0.9;
+            display: block;
+            margin-top: 1px;
+        }
 
         /* ============================================================
            LOADING
@@ -602,13 +648,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(2px);
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--gray);
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--gray);
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
@@ -616,9 +662,6 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ============================================================
-           PWA INSTALL BANNER
-           ============================================================ */
         .install-banner {
             display: none;
             position: fixed;
@@ -626,105 +669,165 @@
             left: 0;
             right: 0;
             background: white;
-            padding: 16px 20px;
+            padding: 14px 16px;
             box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
             z-index: 500;
-            animation: slideUpBanner 0.4s ease;
+            animation: slideUpBanner 0.35s ease;
             border-top: 1px solid #E8ECF0;
-            padding-bottom: calc(16px + var(--safe-area-inset, 0px));
+            padding-bottom: calc(14px + var(--safe-area-inset));
         }
 
-        .install-banner.show { display: flex; align-items: center; gap: 12px; }
+        .install-banner.show { display: flex; align-items: center; gap: 10px; }
 
         @keyframes slideUpBanner {
             from { opacity: 0; transform: translateY(100%); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .install-banner .icon { font-size: 28px; flex-shrink: 0; }
+        .install-banner .icon { font-size: 24px; flex-shrink: 0; }
         .install-banner .content { flex: 1; }
-        .install-banner .content h4 { font-size: 15px; font-weight: 600; color: var(--text); }
-        .install-banner .content p { font-size: 13px; color: var(--text-light); }
+        .install-banner .content h4 { font-size: 14px; font-weight: 600; color: var(--text); }
+        .install-banner .content p { font-size: 12px; color: var(--text-light); }
 
         .install-banner .btn-install {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 8px 20px;
-            border-radius: 10px;
+            padding: 8px 16px;
+            border-radius: 8px;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             flex-shrink: 0;
+            min-height: 36px;
         }
+
+        .install-banner .btn-install:active { transform: scale(0.95); }
 
         .install-banner .btn-close {
             background: none;
             border: none;
-            font-size: 20px;
+            font-size: 18px;
             cursor: pointer;
             color: var(--text-light);
-            padding: 0 8px;
-        }
-
-        /* ============================================================
-           RESPONSIVE
-           ============================================================ */
-        @media (max-width: 1024px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            padding: 4px 8px;
         }
 
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
-                width: 280px;
+                width: 260px;
             }
 
             .sidebar.open { transform: translateX(0); }
 
             .main-content {
                 margin-left: 0;
-                padding: 16px;
+                padding: 12px 14px 20px;
                 max-width: 100%;
             }
 
-            .mobile-toggle { display: flex; }
+            .mobile-toggle { 
+                display: flex;
+                min-height: 40px;
+                min-width: 40px;
+                justify-content: center;
+                align-items: center;
+            }
 
             .header {
                 flex-direction: column;
                 align-items: stretch;
+                gap: 8px;
             }
 
-            .header-actions { flex-wrap: wrap; }
-            .header-actions input { flex: 1; min-width: 120px; }
+            .header-actions {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .header-actions input { 
+                flex: 1; 
+                min-width: 100px;
+                height: 36px;
+                font-size: 14px;
+            }
 
             .stats-grid {
                 grid-template-columns: 1fr 1fr;
-                gap: 10px;
+                gap: 8px;
             }
 
-            .pam-card .score { font-size: 40px; }
-            .modal { padding: 20px; margin: 10px; }
-            .toast-container { right: 12px; left: 12px; max-width: 100%; }
-        }
+            .stat-card { padding: 10px; }
+            .stat-card .value { font-size: 20px; }
 
-        @media (max-width: 480px) {
-            .stats-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-            .stat-card { padding: 12px; }
-            .stat-card .value { font-size: 22px; }
-            .pam-card { padding: 18px 20px; }
-            .pam-card .score { font-size: 36px; }
-            .header h1 { font-size: 20px; }
-            .btn { font-size: 13px; padding: 8px 14px; }
-            .goal-item { flex-wrap: wrap; }
-            .goal-item .status { font-size: 10px; padding: 2px 10px; }
-            table { font-size: 13px; }
+            .pam-card { padding: 16px 18px; }
+            .pam-card .score { font-size: 34px; }
+
+            .modal {
+                padding: 16px 18px;
+                border-radius: 16px 16px 0 0;
+            }
+
+            .toast-container {
+                top: 60px;
+                right: 12px;
+                left: 12px;
+                max-width: 100%;
+            }
+
+            .toast {
+                max-width: 100%;
+                min-width: unset;
+                padding: 12px 16px;
+            }
+
+            .install-banner {
+                padding: 10px 14px;
+            }
+            .install-banner .content h4 { font-size: 13px; }
+            .install-banner .content p { font-size: 11px; }
+            .install-banner .btn-install { font-size: 12px; padding: 6px 14px; }
+
+            .btn { 
+                font-size: 12px; 
+                padding: 6px 12px; 
+                min-height: 34px;
+            }
+            
+            .header h1 { font-size: 18px; }
+            .card { padding: 12px; }
+            .card-header h3 { font-size: 15px; }
+            
+            table { font-size: 12px; }
             th, td { padding: 6px 4px; }
+            
+            .goal-item .description { font-size: 12px; }
+            .goal-item .domain { font-size: 10px; }
+            
+            .btn-sm { padding: 3px 8px; font-size: 10px; min-height: 26px; }
         }
 
-        /* ============================================================
-           DARK MODE
-           ============================================================ */
+        @media (max-width: 400px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+            }
+            
+            .stat-card { padding: 8px; }
+            .stat-card .value { font-size: 18px; }
+            .stat-card .label { font-size: 10px; }
+            
+            .pam-card .score { font-size: 28px; }
+            .pam-card { padding: 12px 14px; }
+            
+            .header h1 { font-size: 16px; }
+            .header .subtitle { font-size: 11px; }
+            
+            .modal { padding: 12px 14px; }
+            .modal h2 { font-size: 18px; }
+        }
+
         @media (prefers-color-scheme: dark) {
             :root {
                 --background: #121212;
@@ -737,8 +840,9 @@
             .card { background: #1E1E1E; }
             .stat-card { background: #1E1E1E; }
             .goal-item { border-bottom-color: #333; }
-            .goal-item:hover { background: #2A2A2A; }
+            .goal-item:active { background: #2A2A2A; }
             .modal { background: #1E1E1E; }
+            
             .modal .form-group input,
             .modal .form-group select,
             .modal .form-group textarea {
@@ -746,13 +850,15 @@
                 border-color: #444;
                 color: #E8E8E8;
             }
+            
             .header-actions input {
                 background: #1E1E1E;
                 border-color: #444;
                 color: #E8E8E8;
             }
-            .nav-item:hover { background: #2A2A2A; }
-            tr:hover td { background: #2A2A2A; }
+            
+            .nav-item:active { background: #2A2A2A; }
+            tr:active td { background: #2A2A2A; }
             .insight-item { background: #2A2A2A; }
             
             .risk-indicator.low { background: #1B3A1B; color: #81C784; }
@@ -765,9 +871,8 @@
             .goal-item .status.planned { background: #3A2A1B; color: #FFB74D; }
             
             .loading-overlay { background: rgba(0,0,0,0.85); }
-            .modal .close:hover { background: #2A2A2A; }
             .btn-outline { border-color: var(--primary-light); color: var(--primary-light); }
-            .btn-outline:hover { background: var(--primary); color: white; }
+            .btn-outline:active { background: var(--primary); color: white; }
             
             .install-banner {
                 background: #1E1E1E;
@@ -778,9 +883,6 @@
 </head>
 <body>
 
-    <!-- ============================================================
-    SIDEBAR
-    ============================================================ -->
     <nav class="sidebar" id="sidebar">
         <div class="logo">
             <div>
@@ -828,9 +930,6 @@
         </button>
     </nav>
 
-    <!-- ============================================================
-    INSTALL BANNER
-    ============================================================ -->
     <div class="install-banner" id="installBanner">
         <span class="icon">📱</span>
         <div class="content">
@@ -841,12 +940,8 @@
         <button class="btn-close" id="closeInstallBanner">✕</button>
     </div>
 
-    <!-- ============================================================
-    MAIN CONTENT
-    ============================================================ -->
     <main class="main-content">
 
-        <!-- HEADER -->
         <div class="header">
             <div class="header-left">
                 <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
@@ -857,21 +952,17 @@
             </div>
             <div class="header-actions">
                 <input type="text" placeholder="🔍 Search patients..." id="searchInput" oninput="searchPatients()">
-                <button class="btn btn-primary" onclick="showModal('addPatient')">+ New Patient</button>
-                <button class="btn btn-outline" onclick="refreshData()">🔄 Refresh</button>
+                <button class="btn btn-primary" onclick="showModal('addPatient')">+ New</button>
+                <button class="btn btn-outline" onclick="refreshData()">🔄</button>
             </div>
         </div>
 
-        <!-- ============================================================
-        VIEW: DASHBOARD
-        ============================================================ -->
         <div id="view-dashboard" class="view active">
 
-            <!-- PAM Card -->
             <div class="pam-card" id="pamCard">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">
                     <div>
-                        <div style="font-size:13px;opacity:0.8;">Patient Activation Measure</div>
+                        <div style="font-size:12px;opacity:0.8;">Patient Activation Measure</div>
                         <div class="score" id="pamScore">--</div>
                         <div>
                             <span class="level" id="pamLevel">Loading...</span>
@@ -879,13 +970,12 @@
                         </div>
                     </div>
                     <div style="text-align:right;">
-                        <div style="font-size:12px;opacity:0.8;">Last updated</div>
-                        <div style="font-weight:500;" id="pamDate">--</div>
+                        <div style="font-size:11px;opacity:0.8;">Last updated</div>
+                        <div style="font-weight:500;font-size:14px;" id="pamDate">--</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Stats -->
             <div class="stats-grid" id="statsGrid">
                 <div class="stat-card">
                     <div class="label">Total Goals</div>
@@ -909,48 +999,43 @@
                 </div>
             </div>
 
-            <!-- Risk Assessment -->
             <div class="card">
                 <div class="card-header">
                     <h3>🛡️ Risk Assessment</h3>
-                    <span id="riskBadge" style="padding:4px 16px;border-radius:12px;font-weight:600;font-size:13px;">Loading...</span>
+                    <span id="riskBadge" style="padding:2px 14px;border-radius:10px;font-weight:600;font-size:12px;">Loading...</span>
                 </div>
-                <div id="riskFactors" style="font-size:14px;color:var(--text-light);">
+                <div id="riskFactors" style="font-size:13px;color:var(--text-light);">
                     Loading risk factors...
                 </div>
-                <div style="margin-top:12px;">
-                    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+                <div style="margin-top:10px;">
+                    <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
                         <span>Risk Score</span>
                         <span id="riskScore">--</span>
                     </div>
-                    <div style="height:6px;background:var(--gray);border-radius:3px;overflow:hidden;">
-                        <div id="riskBar" style="height:100%;width:0%;background:var(--success);border-radius:3px;transition:width 0.8s ease;"></div>
+                    <div style="height:5px;background:var(--gray);border-radius:3px;overflow:hidden;">
+                        <div id="riskBar" style="height:100%;width:0%;background:var(--success);border-radius:3px;transition:width 0.6s ease;"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Recent Activity -->
             <div class="card">
                 <div class="card-header">
                     <h3>📋 Recent Activity</h3>
                     <button class="btn btn-outline btn-sm" onclick="navigateTo('goals')">View All</button>
                 </div>
                 <div id="recentActivity">
-                    <div class="empty-state" style="padding:20px;">
-                        <p>No recent activity</p>
+                    <div class="empty-state" style="padding:16px;">
+                        <p style="font-size:13px;">No recent activity</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ============================================================
-        VIEW: PATIENTS
-        ============================================================ -->
         <div id="view-patients" class="view">
             <div class="card">
                 <div class="card-header">
                     <h3>👤 Patient List</h3>
-                    <button class="btn btn-primary" onclick="showModal('addPatient')">+ Add Patient</button>
+                    <button class="btn btn-primary" onclick="showModal('addPatient')">+ Add</button>
                 </div>
                 <div class="table-container">
                     <table>
@@ -966,22 +1051,19 @@
                             </tr>
                         </thead>
                         <tbody id="patientTableBody">
-                            <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-light);">Loading patients...</td></tr>
+                            <tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-light);">Loading patients...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- ============================================================
-        VIEW: GOALS
-        ============================================================ -->
         <div id="view-goals" class="view">
             <div class="card">
                 <div class="card-header">
                     <h3>🎯 All Goals</h3>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                        <select id="goalFilter" onchange="filterGoals()" style="padding:8px 12px;border-radius:8px;border:2px solid #E8ECF0;font-size:13px;background:white;">
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                        <select id="goalFilter" onchange="filterGoals()" style="padding:5px 10px;border-radius:6px;border:2px solid #E8ECF0;font-size:12px;background:white;height:34px;">
                             <option value="all">All</option>
                             <option value="planned">Planned</option>
                             <option value="in_progress">In Progress</option>
@@ -989,7 +1071,7 @@
                             <option value="partially_achieved">Partially</option>
                             <option value="abandoned">Abandoned</option>
                         </select>
-                        <button class="btn btn-primary" onclick="showModal('addGoal')">+ New Goal</button>
+                        <button class="btn btn-primary" onclick="showModal('addGoal')">+ New</button>
                     </div>
                 </div>
                 <div id="goalsList">
@@ -1001,14 +1083,11 @@
             </div>
         </div>
 
-        <!-- ============================================================
-        VIEW: OUTCOMES
-        ============================================================ -->
         <div id="view-outcomes" class="view">
             <div class="card">
                 <div class="card-header">
                     <h3>📈 Health Outcomes</h3>
-                    <button class="btn btn-primary" onclick="showModal('addOutcome')">+ Record Outcome</button>
+                    <button class="btn btn-primary" onclick="showModal('addOutcome')">+ Record</button>
                 </div>
                 <div id="outcomesList">
                     <div class="empty-state">
@@ -1019,33 +1098,27 @@
             </div>
         </div>
 
-        <!-- ============================================================
-        VIEW: INSIGHTS
-        ============================================================ -->
         <div id="view-insights" class="view">
             <div class="card">
                 <div class="card-header">
                     <h3>🧠 AI-Powered Insights</h3>
-                    <button class="btn btn-outline" onclick="generateInsights()">🔄 Refresh</button>
+                    <button class="btn btn-outline" onclick="generateInsights()">🔄</button>
                 </div>
                 <div id="insightsContent">
                     <div class="empty-state">
                         <div class="icon">🧠</div>
                         <h4>Generating insights...</h4>
-                        <p>AI analysis in progress</p>
+                        <p style="font-size:13px;">AI analysis in progress</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ============================================================
-        VIEW: NOTES
-        ============================================================ -->
         <div id="view-notes" class="view">
             <div class="card">
                 <div class="card-header">
                     <h3>📝 Clinical Notes</h3>
-                    <button class="btn btn-primary" onclick="showModal('addNote')">+ Add Note</button>
+                    <button class="btn btn-primary" onclick="showModal('addNote')">+ Add</button>
                 </div>
                 <div id="notesList">
                     <div class="empty-state">
@@ -1056,39 +1129,36 @@
             </div>
         </div>
 
-        <!-- ============================================================
-        VIEW: SETTINGS
-        ============================================================ -->
         <div id="view-settings" class="view">
             <div class="card">
                 <div class="card-header">
                     <h3>⚙️ Settings</h3>
                 </div>
                 <div style="margin-top:4px;">
-                    <div style="margin-bottom:16px;">
-                        <label style="display:block;font-weight:600;margin-bottom:4px;font-size:14px;">Current Patient</label>
-                        <select id="patientSelect" onchange="changePatient()" style="padding:10px;border-radius:8px;border:2px solid #E8ECF0;width:100%;max-width:300px;background:white;font-size:14px;">
+                    <div style="margin-bottom:12px;">
+                        <label style="display:block;font-weight:600;margin-bottom:3px;font-size:13px;">Current Patient</label>
+                        <select id="patientSelect" onchange="changePatient()" style="padding:8px 12px;border-radius:6px;border:2px solid #E8ECF0;width:100%;max-width:280px;background:white;font-size:14px;">
                             <option>Loading...</option>
                         </select>
                     </div>
-                    <div style="margin-bottom:16px;">
-                        <label style="display:block;font-weight:600;margin-bottom:4px;font-size:14px;">Notifications</label>
-                        <label style="display:flex;align-items:center;gap:8px;margin:4px 0;font-size:14px;cursor:pointer;">
+                    <div style="margin-bottom:12px;">
+                        <label style="display:block;font-weight:600;margin-bottom:3px;font-size:13px;">Notifications</label>
+                        <label style="display:flex;align-items:center;gap:6px;margin:3px 0;font-size:13px;cursor:pointer;">
                             <input type="checkbox" checked> Enable Push Notifications
                         </label>
-                        <label style="display:flex;align-items:center;gap:8px;margin:4px 0;font-size:14px;cursor:pointer;">
+                        <label style="display:flex;align-items:center;gap:6px;margin:3px 0;font-size:13px;cursor:pointer;">
                             <input type="checkbox" checked> AI Insight Alerts
                         </label>
-                        <label style="display:flex;align-items:center;gap:8px;margin:4px 0;font-size:14px;cursor:pointer;">
+                        <label style="display:flex;align-items:center;gap:6px;margin:3px 0;font-size:13px;cursor:pointer;">
                             <input type="checkbox"> Email Reports
                         </label>
                     </div>
-                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                        <button class="btn btn-outline" onclick="exportData()">📤 Export Data</button>
-                        <button class="btn btn-danger" onclick="clearData()">🗑️ Clear Data</button>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <button class="btn btn-outline" onclick="exportData()">📤 Export</button>
+                        <button class="btn btn-danger" onclick="clearData()">🗑️ Clear</button>
                     </div>
-                    <div style="margin-top:16px;padding-top:16px;border-top:1px solid #E8ECF0;">
-                        <p style="font-size:13px;color:var(--text-light);">
+                    <div style="margin-top:12px;padding-top:12px;border-top:1px solid #E8ECF0;">
+                        <p style="font-size:12px;color:var(--text-light);">
                             NHS England Personalised Care Model v2.0<br>
                             AI-powered health management
                         </p>
@@ -1099,24 +1169,16 @@
 
     </main>
 
-    <!-- ============================================================
-    MODAL
-    ============================================================ -->
     <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
         <div class="modal">
+            <div class="handle"></div>
             <button class="close" onclick="closeModal()">✕</button>
             <div id="modalBody"></div>
         </div>
     </div>
 
-    <!-- ============================================================
-    TOAST CONTAINER
-    ============================================================ -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- ============================================================
-    JAVASCRIPT - COMPLETE APP
-    ============================================================ -->
     <script>
         // ================================================================
         // APP STATE
@@ -1134,6 +1196,8 @@
         };
 
         const API_URL = '/api';
+        let toastTimer = null;
+        let isInitialLoad = true;
 
         // ================================================================
         // PWA INSTALLATION FEATURES
@@ -1141,13 +1205,11 @@
         let deferredPrompt = null;
         let isAppInstalled = false;
 
-        // Check if already in standalone mode
         if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
             isAppInstalled = true;
             document.getElementById('installBanner').classList.remove('show');
         }
 
-        // Listen for beforeinstallprompt
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
@@ -1156,10 +1218,9 @@
             }
         });
 
-        // Install button handler
         document.getElementById('installBtn').addEventListener('click', async () => {
             if (!deferredPrompt) {
-                showToast('ℹ️', 'Tap the menu (3 dots) and select "Install App"', 'info');
+                showToast('Install', 'Tap the menu (3 dots) and select "Install App"', 'info');
                 return;
             }
             
@@ -1169,23 +1230,21 @@
             if (result.outcome === 'accepted') {
                 isAppInstalled = true;
                 document.getElementById('installBanner').classList.remove('show');
-                showToast('✅ Installed', 'App installed successfully!', 'success');
+                showToast('Success', 'App installed successfully!', 'success');
             } else {
-                showToast('ℹ️', 'You can install later from the browser menu', 'info');
+                showToast('Info', 'You can install later from the browser menu', 'info');
             }
             deferredPrompt = null;
         });
 
-        // Close install banner
         document.getElementById('closeInstallBanner').addEventListener('click', () => {
             document.getElementById('installBanner').classList.remove('show');
         });
 
-        // Listen for app installed event
         window.addEventListener('appinstalled', () => {
             isAppInstalled = true;
             document.getElementById('installBanner').classList.remove('show');
-            showToast('🎉', 'App installed successfully!', 'success');
+            showToast('Success', 'App installed successfully!', 'success');
         });
 
         // ================================================================
@@ -1194,17 +1253,9 @@
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js')
                 .then(registration => {
-                    console.log('✅ Service Worker registered');
-                    registration.addEventListener('updatefound', () => {
-                        const newWorker = registration.installing;
-                        newWorker.addEventListener('statechange', () => {
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                showToast('🔄 Update', 'New version available. Refresh to update.', 'info');
-                            }
-                        });
-                    });
+                    console.log('Service Worker registered');
                 })
-                .catch(err => console.log('❌ SW registration failed:', err));
+                .catch(err => console.log('SW registration failed:', err));
         }
 
         // ================================================================
@@ -1222,17 +1273,17 @@
         // OFFLINE STATUS
         // ================================================================
         window.addEventListener('online', () => {
-            showToast('📶 Online', 'Connection restored. Refreshing data...', 'success');
+            showToast('Online', 'Connection restored. Refreshing data...', 'success');
             loadData();
         });
         
         window.addEventListener('offline', () => {
-            showToast('📶 Offline', 'You are offline. Some features may not work.', 'error');
+            showToast('Offline', 'You are offline. Some features may not work.', 'error');
         });
 
         if (!navigator.onLine) {
             setTimeout(() => {
-                showToast('📶 Offline', 'You are offline. Data may not be up to date.', 'error');
+                showToast('Offline', 'You are offline. Data may not be up to date.', 'error');
             }, 1000);
         }
 
@@ -1249,7 +1300,10 @@
         });
 
         async function loadData() {
-            showLoading();
+            if (!App.isLoaded) {
+                showLoading();
+            }
+            
             try {
                 await Promise.all([
                     loadPatients(),
@@ -1261,12 +1315,17 @@
                 await generateInsights();
                 App.isLoaded = true;
                 renderAll();
+                
                 hideLoading();
-                showToast('✅ Data Loaded', 'All data refreshed successfully', 'success');
+                
+                if (isInitialLoad) {
+                    showToast('Data Loaded', 'All data refreshed successfully', 'success');
+                    isInitialLoad = false;
+                }
             } catch (error) {
                 console.error('Error loading data:', error);
                 hideLoading();
-                showToast('❌ Error', 'Failed to load data: ' + error.message, 'error');
+                showToast('Error', 'Failed to load data: ' + error.message, 'error');
             }
         }
 
@@ -1408,7 +1467,7 @@
             const risk = App.insights.risk_assessment || { risk_level: 'low', risk_score: 0.25 };
             const riskBadge = document.getElementById('riskBadge');
             const riskLevel = risk.risk_level || 'low';
-            const riskLabels = { low: 'Low Risk', medium: 'Medium Risk', high: 'High Risk', critical: '🚨 CRITICAL' };
+            const riskLabels = { low: 'Low', medium: 'Medium', high: 'High', critical: '🚨 CRITICAL' };
             const riskColors = { low: '#E8F5E9', medium: '#FFF3E0', high: '#FFEBEE', critical: '#FF1744' };
             const riskTextColors = { low: '#2E7D32', medium: '#E65100', high: '#C62828', critical: 'white' };
 
@@ -1454,7 +1513,7 @@
             });
 
             if (activities.length === 0) {
-                container.innerHTML = `<div class="empty-state" style="padding:20px;"><p>No recent activity</p></div>`;
+                container.innerHTML = `<div class="empty-state" style="padding:12px;"><p style="font-size:13px;">No recent activity</p></div>`;
                 return;
             }
 
@@ -1476,7 +1535,7 @@
         function renderPatients() {
             const tbody = document.getElementById('patientTableBody');
             if (!App.patients || App.patients.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-light);">No patients found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-light);">No patients found</td></tr>';
                 return;
             }
 
@@ -1491,7 +1550,7 @@
                         <td>${isNaN(age) ? '--' : age}</td>
                         <td>${p.gender || 'N/A'}</td>
                         <td><strong>${pam.score}</strong></td>
-                        <td><span class="status ${isActive ? 'in_progress' : ''}" style="${isActive ? 'background:#E3F2FD;color:#005EB8;' : ''}">${isActive ? '✅ Active' : 'Inactive'}</span></td>
+                        <td><span class="status ${isActive ? 'in_progress' : ''}" style="${isActive ? 'background:#E3F2FD;color:#005EB8;' : ''}">${isActive ? '✅ Active' : ''}</span></td>
                         <td>
                             <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();selectPatient('${p.nhs_number}')">Select</button>
                         </td>
@@ -1516,7 +1575,7 @@
                     <div class="empty-state">
                         <div class="icon">🎯</div>
                         <h4>No goals found</h4>
-                        <p>Create your first personalised goal</p>
+                        <p style="font-size:13px;">Create your first personalised goal</p>
                         <button class="btn btn-primary" onclick="showModal('addGoal')">Add Goal</button>
                     </div>
                 `;
@@ -1531,7 +1590,7 @@
                     <div class="goal-item">
                         <div class="info">
                             <div class="description">${g.description}</div>
-                            <div class="domain">${g.domain || 'General'} • ${g.target_date ? 'Target: ' + new Date(g.target_date).toLocaleDateString() : 'No target'}</div>
+                            <div class="domain">${g.domain || 'General'} ${g.target_date ? '• Target: ' + new Date(g.target_date).toLocaleDateString() : ''}</div>
                             <div class="progress">
                                 <div class="fill" style="width:${progress}%;"></div>
                             </div>
@@ -1539,7 +1598,7 @@
                         <div style="text-align:right;flex-shrink:0;">
                             <span class="status ${g.status}">${g.status.replace('_', ' ').toUpperCase()}</span>
                             <div>
-                                <button class="btn btn-outline btn-sm" style="margin-top:4px;" onclick="showModal('editGoal','${g.goal_id}')">Edit</button>
+                                <button class="btn btn-outline btn-sm" style="margin-top:3px;" onclick="showModal('editGoal','${g.goal_id}')">Edit</button>
                             </div>
                         </div>
                     </div>
@@ -1554,7 +1613,7 @@
                     <div class="empty-state">
                         <div class="icon">📈</div>
                         <h4>No outcomes recorded</h4>
-                        <p>Track your health metrics</p>
+                        <p style="font-size:13px;">Track your health metrics</p>
                         <button class="btn btn-primary" onclick="showModal('addOutcome')">Record Outcome</button>
                     </div>
                 `;
@@ -1605,7 +1664,7 @@
                     <div class="empty-state">
                         <div class="icon">📝</div>
                         <h4>No notes yet</h4>
-                        <p>Add clinical notes to track your health journey</p>
+                        <p style="font-size:13px;">Add clinical notes to track your health journey</p>
                         <button class="btn btn-primary" onclick="showModal('addNote')">Add Note</button>
                     </div>
                 `;
@@ -1613,17 +1672,17 @@
             }
 
             container.innerHTML = App.notes.slice().reverse().map(n => `
-                <div style="padding:14px 0;border-bottom:1px solid #F0F0F0;">
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+                <div style="padding:12px 0;border-bottom:1px solid #F0F0F0;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
                         <div style="flex:1;min-width:0;">
-                            <div style="font-size:14px;word-wrap:break-word;">${n.note_text}</div>
-                            <div style="font-size:12px;color:var(--text-light);margin-top:4px;">
+                            <div style="font-size:13px;word-wrap:break-word;">${n.note_text}</div>
+                            <div style="font-size:11px;color:var(--text-light);margin-top:3px;">
                                 ${n.author || 'Unknown'} • ${new Date(n.date_created).toLocaleString()}
                             </div>
                         </div>
                         ${n.sentiment_score !== undefined ? `
                             <span class="status ${n.sentiment_score > 0.1 ? 'achieved' : n.sentiment_score < -0.1 ? 'planned' : 'in_progress'}" style="flex-shrink:0;">
-                                ${n.sentiment_score > 0.1 ? '😊 Positive' : n.sentiment_score < -0.1 ? '😔 Negative' : '😐 Neutral'}
+                                ${n.sentiment_score > 0.1 ? '😊' : n.sentiment_score < -0.1 ? '😔' : '😐'}
                             </span>
                         ` : ''}
                     </div>
@@ -1640,7 +1699,7 @@
                     <div class="empty-state">
                         <div class="icon">🧠</div>
                         <h4>No insights available</h4>
-                        <p>Generate AI insights to get started</p>
+                        <p style="font-size:13px;">Generate AI insights to get started</p>
                         <button class="btn btn-primary" onclick="generateInsights()">Generate Insights</button>
                     </div>
                 `;
@@ -1654,18 +1713,18 @@
             const riskColors = { low: 'var(--success)', medium: 'var(--warning)', high: 'var(--danger)', critical: 'var(--danger)' };
             
             html += `
-                <div style="padding:14px 16px;border-left:4px solid ${riskColors[riskLevel]};background:#FAFAFA;border-radius:8px;margin-bottom:14px;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                <div style="padding:12px 14px;border-left:3px solid ${riskColors[riskLevel]};background:#FAFAFA;border-radius:6px;margin-bottom:12px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
                         <div>
-                            <strong>Risk Assessment</strong>
-                            <div style="font-size:13px;color:var(--text-light);">${riskLevel.toUpperCase()} Risk • Score: ${(risk.risk_score || 0).toFixed(2)}</div>
+                            <strong style="font-size:13px;">Risk Assessment</strong>
+                            <div style="font-size:12px;color:var(--text-light);">${riskLevel.toUpperCase()} Risk • Score: ${(risk.risk_score || 0).toFixed(2)}</div>
                         </div>
                         <span class="status ${riskLevel === 'low' ? 'achieved' : riskLevel === 'medium' ? 'in_progress' : 'planned'}">
                             ${riskLevel.toUpperCase()}
                         </span>
                     </div>
                     ${risk.factors && risk.factors.length > 0 ? `
-                        <div style="font-size:13px;color:var(--text-light);margin-top:6px;">
+                        <div style="font-size:12px;color:var(--text-light);margin-top:4px;">
                             Factors: ${risk.factors.join(' • ')}
                         </div>
                     ` : ''}
@@ -1674,20 +1733,20 @@
 
             const pam = insights.pam_trajectory || {};
             html += `
-                <div style="padding:14px 16px;border-left:4px solid var(--primary);background:#FAFAFA;border-radius:8px;margin-bottom:14px;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                <div style="padding:12px 14px;border-left:3px solid var(--primary);background:#FAFAFA;border-radius:6px;margin-bottom:12px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
                         <div>
-                            <strong>PAM Prediction</strong>
-                            <div style="font-size:13px;color:var(--text-light);">Predicted: ${pam.predicted_score || '--'} • Trend: ${pam.trend || 'Stable'}</div>
+                            <strong style="font-size:13px;">PAM Prediction</strong>
+                            <div style="font-size:12px;color:var(--text-light);">Predicted: ${pam.predicted_score || '--'} • Trend: ${pam.trend || 'Stable'}</div>
                         </div>
                         <span class="status ${pam.trend === 'improving' ? 'achieved' : pam.trend === 'declining' ? 'planned' : 'in_progress'}">
                             ${(pam.trend || 'Stable').toUpperCase()}
                         </span>
                     </div>
                     ${pam.trajectory && pam.trajectory.length > 0 ? `
-                        <div style="margin-top:8px;display:flex;gap:4px;align-items:flex-end;height:40px;">
+                        <div style="margin-top:6px;display:flex;gap:3px;align-items:flex-end;height:30px;">
                             ${pam.trajectory.slice(0,10).map((p, i) => `
-                                <div style="flex:1;background:var(--primary);height:${(p/100)*40}px;border-radius:2px;min-height:4px;opacity:${0.4 + (i/pam.trajectory.length)*0.6};"></div>
+                                <div style="flex:1;background:var(--primary);height:${(p/100)*30}px;border-radius:2px;min-height:3px;opacity:${0.4 + (i/pam.trajectory.length)*0.6};"></div>
                             `).join('')}
                         </div>
                     ` : ''}
@@ -1696,7 +1755,7 @@
 
             const recs = insights.recommendations || [];
             if (recs.length > 0) {
-                html += `<h4 style="margin:14px 0 10px;font-size:15px;">💡 Recommendations</h4>`;
+                html += `<h4 style="margin:12px 0 8px;font-size:14px;">💡 Recommendations</h4>`;
                 recs.forEach(rec => {
                     html += `
                         <div class="insight-item">
@@ -1712,18 +1771,18 @@
 
             const domains = insights.domain_scores || {};
             if (Object.keys(domains).length > 0) {
-                html += `<h4 style="margin:14px 0 10px;font-size:15px;">📊 Domain Scores</h4>`;
+                html += `<h4 style="margin:12px 0 8px;font-size:14px;">📊 Domain Scores</h4>`;
                 Object.entries(domains).forEach(([domain, score]) => {
                     const pct = Math.min((score / 10 * 100), 100);
                     const color = pct < 40 ? 'var(--danger)' : pct < 60 ? 'var(--warning)' : 'var(--success)';
                     html += `
-                        <div style="margin:6px 0;">
-                            <div style="display:flex;justify-content:space-between;font-size:13px;">
+                        <div style="margin:4px 0;">
+                            <div style="display:flex;justify-content:space-between;font-size:12px;">
                                 <span>${domain.replace('_', ' ').toUpperCase()}</span>
                                 <span>${score.toFixed(1)}/10</span>
                             </div>
-                            <div style="height:6px;background:var(--gray);border-radius:3px;overflow:hidden;">
-                                <div style="height:100%;width:${pct}%;background:${color};border-radius:3px;transition:width 0.8s ease;"></div>
+                            <div style="height:4px;background:var(--gray);border-radius:2px;overflow:hidden;">
+                                <div style="height:100%;width:${pct}%;background:${color};border-radius:2px;transition:width 0.6s ease;"></div>
                             </div>
                         </div>
                     `;
@@ -1733,14 +1792,14 @@
             const sentiment = insights.sentiment_analysis || {};
             if (sentiment.classification) {
                 html += `
-                    <div style="margin-top:14px;padding:12px 16px;background:#FAFAFA;border-radius:8px;">
-                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-                            <span><strong>💭 Sentiment Analysis</strong></span>
+                    <div style="margin-top:12px;padding:10px 14px;background:#FAFAFA;border-radius:6px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+                            <span style="font-size:13px;"><strong>💭 Sentiment Analysis</strong></span>
                             <span class="status ${sentiment.classification === 'positive' ? 'achieved' : sentiment.classification === 'negative' ? 'planned' : 'in_progress'}">
                                 ${sentiment.classification.toUpperCase()}
                             </span>
                         </div>
-                        <div style="display:flex;gap:16px;margin-top:6px;font-size:13px;color:var(--text-light);">
+                        <div style="display:flex;gap:12px;margin-top:4px;font-size:12px;color:var(--text-light);">
                             <span>Positive: ${((sentiment.positive_ratio || 0) * 100).toFixed(0)}%</span>
                             <span>Negative: ${((sentiment.negative_ratio || 0) * 100).toFixed(0)}%</span>
                             <span>Neutral: ${((sentiment.neutral_ratio || 0) * 100).toFixed(0)}%</span>
@@ -1810,8 +1869,20 @@
         }
 
         function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
         }
+
+        document.addEventListener('click', function(e) {
+            const sidebar = document.getElementById('sidebar');
+            const toggle = document.querySelector('.mobile-toggle');
+            if (window.innerWidth <= 768 &&
+                !sidebar.contains(e.target) &&
+                !toggle.contains(e.target) &&
+                sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+            }
+        });
 
         // ================================================================
         // PATIENT SELECTION
@@ -1819,7 +1890,7 @@
         function selectPatient(nhsNumber) {
             App.currentPatient = nhsNumber;
             document.getElementById('sidebar').classList.remove('open');
-            showToast('👤 Patient Selected', 'Switched to ' + nhsNumber, 'info');
+            showToast('Patient Selected', 'Switched to ' + nhsNumber, 'info');
             loadData();
         }
 
@@ -2019,21 +2090,20 @@
                 });
                 const result = await res.json();
                 if (result.success) {
-                    showToast('✅ Patient Added', 'Patient registered successfully', 'success');
+                    showToast('Patient Added', 'Patient registered successfully', 'success');
                     closeModal();
                     loadData();
                 } else {
-                    showToast('❌ Error', result.error || 'Failed to add patient', 'error');
+                    showToast('Error', result.error || 'Failed to add patient', 'error');
                 }
             } catch (error) {
-                showToast('❌ Error', error.message, 'error');
+                showToast('Error', error.message, 'error');
             }
         }
 
         async function addGoal(e) {
             e.preventDefault();
             
-            // Show loading state
             const submitBtn = document.querySelector('#modalBody .btn-primary');
             if (submitBtn) {
                 submitBtn.textContent = '⏳ Creating...';
@@ -2043,7 +2113,7 @@
             try {
                 const description = document.getElementById('goalDesc').value.trim();
                 if (!description) {
-                    showToast('❌ Error', 'Please enter a goal description', 'error');
+                    showToast('Error', 'Please enter a goal description', 'error');
                     if (submitBtn) {
                         submitBtn.textContent = 'Create Goal';
                         submitBtn.disabled = false;
@@ -2051,7 +2121,6 @@
                     return;
                 }
 
-                // Get or create plan_id
                 let planId = localStorage.getItem('planId');
                 if (!planId) {
                     planId = 'plan-' + Date.now();
@@ -2068,8 +2137,6 @@
                     status: 'planned'
                 };
 
-                console.log('📤 Creating goal:', data);
-
                 const res = await fetch(`${API_URL}/goal`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -2077,10 +2144,8 @@
                 });
 
                 const result = await res.json();
-                console.log('📥 Response:', result);
-
                 if (result.success) {
-                    showToast('✅ Goal Added', `"${description}" created successfully`, 'success');
+                    showToast('Goal Added', `"${description}" created successfully`, 'success');
                     closeModal();
                     document.getElementById('goalDesc').value = '';
                     document.getElementById('goalSteps').value = '';
@@ -2088,11 +2153,11 @@
                     await loadData();
                     renderGoals();
                 } else {
-                    showToast('❌ Error', result.error || 'Failed to add goal', 'error');
+                    showToast('Error', result.error || 'Failed to add goal', 'error');
                 }
             } catch (error) {
                 console.error('Error adding goal:', error);
-                showToast('❌ Error', error.message || 'Failed to add goal', 'error');
+                showToast('Error', error.message || 'Failed to add goal', 'error');
             } finally {
                 if (submitBtn) {
                     submitBtn.textContent = 'Create Goal';
@@ -2117,14 +2182,14 @@
                 });
                 const result = await res.json();
                 if (result.success) {
-                    showToast('✅ Goal Updated', 'Goal updated successfully', 'success');
+                    showToast('Goal Updated', 'Goal updated successfully', 'success');
                     closeModal();
                     loadData();
                 } else {
-                    showToast('❌ Error', result.error || 'Failed to update goal', 'error');
+                    showToast('Error', result.error || 'Failed to update goal', 'error');
                 }
             } catch (error) {
-                showToast('❌ Error', error.message, 'error');
+                showToast('Error', error.message, 'error');
             }
         }
 
@@ -2147,14 +2212,14 @@
                 });
                 const result = await res.json();
                 if (result.success) {
-                    showToast('✅ Outcome Recorded', 'Health metric recorded successfully', 'success');
+                    showToast('Outcome Recorded', 'Health metric recorded successfully', 'success');
                     closeModal();
                     loadData();
                 } else {
-                    showToast('❌ Error', result.error || 'Failed to record outcome', 'error');
+                    showToast('Error', result.error || 'Failed to record outcome', 'error');
                 }
             } catch (error) {
-                showToast('❌ Error', error.message, 'error');
+                showToast('Error', error.message, 'error');
             }
         }
 
@@ -2174,14 +2239,14 @@
                 });
                 const result = await res.json();
                 if (result.success) {
-                    showToast('✅ Note Added', 'Clinical note saved', 'success');
+                    showToast('Note Added', 'Clinical note saved', 'success');
                     closeModal();
                     loadData();
                 } else {
-                    showToast('❌ Error', result.error || 'Failed to save note', 'error');
+                    showToast('Error', result.error || 'Failed to save note', 'error');
                 }
             } catch (error) {
-                showToast('❌ Error', error.message, 'error');
+                showToast('Error', error.message, 'error');
             }
         }
 
@@ -2193,7 +2258,7 @@
         }
 
         function refreshData() {
-            showToast('🔄 Refreshing', 'Loading latest data...', 'info');
+            showToast('Refreshing', 'Loading latest data...', 'info');
             loadData();
         }
 
@@ -2218,7 +2283,7 @@
             a.download = `nhs_data_${App.currentPatient}_${Date.now()}.json`;
             a.click();
             URL.revokeObjectURL(url);
-            showToast('📤 Exported', 'Data exported successfully', 'success');
+            showToast('Data Exported', 'Data exported successfully', 'success');
         }
 
         function clearData() {
@@ -2232,29 +2297,55 @@
             App.insights = {};
 
             renderAll();
-            showToast('🗑️ Cleared', 'All data has been cleared', 'info');
+            showToast('Data Cleared', 'All data has been cleared', 'info');
         }
 
         // ================================================================
-        // TOASTS
+        // TOASTS - FIXED: Single icon, right side
         // ================================================================
         function showToast(title, message, type = 'info') {
+            // Clear any existing toast timer
+            if (toastTimer) {
+                clearTimeout(toastTimer);
+                toastTimer = null;
+            }
+            
             const container = document.getElementById('toastContainer');
+            
+            // Remove existing toasts immediately
+            const existingToasts = container.querySelectorAll('.toast');
+            existingToasts.forEach(toast => {
+                toast.remove();
+            });
+            
+            // Create new toast
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
+            
+            // Get icon based on type
+            let icon = 'ℹ️';
+            if (type === 'success') icon = '✅';
+            else if (type === 'error') icon = '❌';
+            else if (type === 'info') icon = 'ℹ️';
+            
             toast.innerHTML = `
-                <span style="font-size:18px;">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
-                <div>
-                    <strong>${title}</strong>
-                    <div style="font-size:13px;opacity:0.9;">${message}</div>
+                <span class="toast-icon">${icon}</span>
+                <div class="toast-content">
+                    <span class="toast-title">${title}</span>
+                    <span class="toast-message">${message}</span>
                 </div>
             `;
             container.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(100%)';
-                setTimeout(() => toast.remove(), 400);
+            
+            // Auto-remove after 4 seconds
+            toastTimer = setTimeout(() => {
+                toast.classList.add('hiding');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                    toastTimer = null;
+                }, 300);
             }, 4000);
         }
 
@@ -2270,7 +2361,7 @@
             overlay.innerHTML = `
                 <div style="text-align:center;">
                     <div class="spinner" style="margin:0 auto;"></div>
-                    <div style="margin-top:12px;color:var(--text-light);">Loading...</div>
+                    <div style="margin-top:8px;color:var(--text-light);font-size:13px;">Loading...</div>
                 </div>
             `;
             document.body.appendChild(overlay);
@@ -2282,7 +2373,7 @@
         }
 
         // ================================================================
-        // PWA INSTALL CHECK - Display mode change listener
+        // PWA INSTALL CHECK
         // ================================================================
         const displayMode = window.matchMedia('(display-mode: standalone)');
         displayMode.addEventListener('change', (e) => {
@@ -2296,22 +2387,9 @@
         // INITIALIZATION
         // ================================================================
         console.log('🏥 NHS Personalised Care System Loaded');
-        console.log('📱 Version 2.0');
+        console.log('📱 Version 2.0 - Optimized for Infinix Mobile');
         console.log('👤 Patient:', App.currentPatient);
-        console.log('💡 Use the sidebar to navigate');
         console.log('📱 PWA Installable:', !isAppInstalled);
-
-        // Close sidebar on outside click (mobile)
-        document.addEventListener('click', function(e) {
-            const sidebar = document.getElementById('sidebar');
-            const toggle = document.querySelector('.mobile-toggle');
-            if (window.innerWidth <= 768 &&
-                !sidebar.contains(e.target) &&
-                !toggle.contains(e.target) &&
-                sidebar.classList.contains('open')) {
-                sidebar.classList.remove('open');
-            }
-        });
     </script>
 </body>
 </html>
